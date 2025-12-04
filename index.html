@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机动漫图片获取器</title>
+    <title>中文数字运算验证码示例</title>
     <style>
         * {
             margin: 0;
@@ -15,356 +15,294 @@
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
         }
         
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .header {
             background: white;
-            padding: 30px;
+            padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 450px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
             text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
         }
         
-        .header h1 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-        }
-        
-        .controls {
+        .captcha-wrapper {
             display: flex;
-            gap: 15px;
+            align-items: center;
             justify-content: center;
-            flex-wrap: wrap;
+            margin-bottom: 25px;
+            gap: 15px;
         }
         
-        .btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        #captchaImage {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f5f5f5;
+            min-height: 60px;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+        
+        .refresh-btn {
+            background: #667eea;
             color: white;
             border: none;
+            padding: 12px 20px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1.1em;
-            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 14px;
+            transition: all 0.3s;
         }
         
-        .btn:hover {
+        .refresh-btn:hover {
+            background: #5568d3;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
         
-        .btn:disabled {
-            opacity: 0.6;
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: #764ba2;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: #663399;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
             cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
         }
         
         .loading {
             text-align: center;
-            color: white;
-            font-size: 1.2em;
-            margin: 20px 0;
-            display: none;
-        }
-        
-        .loading.show {
-            display: block;
-        }
-        
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
-        }
-        
-        .image-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.3s;
-            position: relative;
-        }
-        
-        .image-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .image-wrapper {
-            width: 100%;
-            height: 350px;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        
-        .placeholder {
             color: #999;
-            font-size: 1.2em;
-        }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-        
-        .image-wrapper.loading .spinner {
-            display: block;
-        }
-        
-        .image-wrapper.loading .placeholder {
-            display: none;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .image-card .image-footer {
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .image-number {
-            font-weight: bold;
-            color: #667eea;
-            font-size: 1.1em;
-        }
-        
-        .download-btn {
-            padding: 8px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .download-btn:hover {
-            background: #764ba2;
-        }
-        
-        .download-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        @media (max-width: 768px) {
-            .image-grid {
-                grid-template-columns: 1fr;
-            }
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🎨 随机动漫图片获取器</h1>
-            <p style="color: #666; margin-bottom: 20px;">点击按钮一次性获取6张随机动漫图片</p>
-            <div class="controls">
-                <button class="btn" id="fetchBtn" onclick="fetchAllImages()">获取6张图片</button>
-                <button class="btn" id="refreshBtn" onclick="refreshAllImages()">刷新全部</button>
-            </div>
-        </div>
+        <h1>🔐 中文数字运算验证码</h1>
         
-        <div class="loading" id="loading">
-            <p>正在加载图片，请稍候...</p>
-        </div>
-        
-        <div class="image-grid" id="imageGrid">
-            <!-- 6个固定的展示框 -->
-            <div class="image-card">
-                <div class="image-wrapper" id="wrapper-1">
-                    <div class="spinner"></div>
-                    <div class="placeholder">图片 #1</div>
+        <form id="captchaForm">
+            <div class="captcha-wrapper">
+                <div id="captchaImage">
+                    <span class="loading">点击获取验证码</span>
                 </div>
-                <div class="image-footer">
-                    <span class="image-number">图片 #1</span>
-                    <button class="download-btn" id="download-1" onclick="downloadImage(1)" disabled>下载</button>
-                </div>
+                <button type="button" class="refresh-btn" onclick="loadCaptcha()">
+                    🔄 刷新
+                </button>
             </div>
             
-            <div class="image-card">
-                <div class="image-wrapper" id="wrapper-2">
-                    <div class="spinner"></div>
-                    <div class="placeholder">图片 #2</div>
-                </div>
-                <div class="image-footer">
-                    <span class="image-number">图片 #2</span>
-                    <button class="download-btn" id="download-2" onclick="downloadImage(2)" disabled>下载</button>
-                </div>
+            <div class="input-group">
+                <label for="answer">请输入验证码计算结果：</label>
+                <input 
+                    type="text" 
+                    id="answer" 
+                    name="answer" 
+                    placeholder="请输入数字答案"
+                    required
+                    autocomplete="off"
+                >
             </div>
             
-            <div class="image-card">
-                <div class="image-wrapper" id="wrapper-3">
-                    <div class="spinner"></div>
-                    <div class="placeholder">图片 #3</div>
-                </div>
-                <div class="image-footer">
-                    <span class="image-number">图片 #3</span>
-                    <button class="download-btn" id="download-3" onclick="downloadImage(3)" disabled>下载</button>
-                </div>
-            </div>
+            <button type="submit" class="submit-btn">验证提交</button>
             
-            <div class="image-card">
-                <div class="image-wrapper" id="wrapper-4">
-                    <div class="spinner"></div>
-                    <div class="placeholder">图片 #4</div>
-                </div>
-                <div class="image-footer">
-                    <span class="image-number">图片 #4</span>
-                    <button class="download-btn" id="download-4" onclick="downloadImage(4)" disabled>下载</button>
-                </div>
-            </div>
-            
-            <div class="image-card">
-                <div class="image-wrapper" id="wrapper-5">
-                    <div class="spinner"></div>
-                    <div class="placeholder">图片 #5</div>
-                </div>
-                <div class="image-footer">
-                    <span class="image-number">图片 #5</span>
-                    <button class="download-btn" id="download-5" onclick="downloadImage(5)" disabled>下载</button>
-                </div>
-            </div>
-            
-            <div class="image-card">
-                <div class="image-wrapper" id="wrapper-6">
-                    <div class="spinner"></div>
-                    <div class="placeholder">图片 #6</div>
-                </div>
-                <div class="image-footer">
-                    <span class="image-number">图片 #6</span>
-                    <button class="download-btn" id="download-6" onclick="downloadImage(6)" disabled>下载</button>
-                </div>
-            </div>
-        </div>
+            <div id="message" class="message"></div>
+        </form>
     </div>
 
     <script>
-        // 存储图片URL
-        const imageUrls = {};
+        // API配置
+        const API_URL = 'https://v2.xxapi.cn/api/chineseCaptcha';
+        let currentCaptchaId = '';
 
-        async function fetchAllImages() {
-            const fetchBtn = document.getElementById('fetchBtn');
-            const refreshBtn = document.getElementById('refreshBtn');
-            const loading = document.getElementById('loading');
-            
-            fetchBtn.disabled = true;
-            refreshBtn.disabled = true;
-            loading.classList.add('show');
-            
-            // 加载6张图片
-            const promises = [];
-            for (let i = 1; i <= 6; i++) {
-                promises.push(loadImage(i));
-            }
-            
-            await Promise.all(promises);
-            
-            loading.classList.remove('show');
-            fetchBtn.disabled = false;
-            refreshBtn.disabled = false;
-        }
+        // 页面加载时获取验证码
+        window.onload = function() {
+            loadCaptcha();
+        };
 
-        function loadImage(index) {
-            return new Promise((resolve) => {
-                const wrapper = document.getElementById(`wrapper-${index}`);
-                const downloadBtn = document.getElementById(`download-${index}`);
+        // 获取验证码
+        async function loadCaptcha() {
+            const captchaImage = document.getElementById('captchaImage');
+            const messageDiv = document.getElementById('message');
+            
+            try {
+                captchaImage.innerHTML = '<span class="loading">加载中...</span>';
+                messageDiv.style.display = 'none';
                 
-                // 显示加载动画
-                wrapper.classList.add('loading');
+                const response = await fetch(API_URL);
+                const data = await response.json();
                 
-                // 清除旧图片
-                const oldImg = wrapper.querySelector('img');
-                if (oldImg) {
-                    oldImg.remove();
+                if (data.code === 200 && data.data) {
+                    currentCaptchaId = data.data.id;
+                    captchaImage.innerHTML = `<img src="${data.data.url}" alt="验证码" style="max-width: 100%; border-radius: 6px;">`;
+                } else {
+                    throw new Error(data.msg || '获取验证码失败');
                 }
-                
-                // 创建新图片
-                const img = document.createElement('img');
-                const timestamp = new Date().getTime();
-                const imageUrl = `https://www.loliapi.com/acg/?t=${timestamp}_${index}`;
-                
-                img.onload = function() {
-                    wrapper.classList.remove('loading');
-                    imageUrls[index] = imageUrl;
-                    downloadBtn.disabled = false;
-                    resolve();
-                };
-                
-                img.onerror = function() {
-                    wrapper.classList.remove('loading');
-                    console.error(`图片 ${index} 加载失败`);
-                    resolve();
-                };
-                
-                img.src = imageUrl;
-                img.alt = `动漫图片 ${index}`;
-                wrapper.appendChild(img);
-            });
+            } catch (error) {
+                console.error('加载验证码失败:', error);
+                captchaImage.innerHTML = '<span style="color: #e74c3c;">❌ 加载失败</span>';
+                showMessage('获取验证码失败，请刷新重试', 'error');
+            }
         }
 
-        async function downloadImage(index) {
-            const url = imageUrls[index];
-            if (!url) {
-                alert('图片未加载，请先获取图片！');
+        // 验证验证码
+        async function verifyCaptcha(answer) {
+            try {
+                const url = `${API_URL}?type=verify&id=${currentCaptchaId}&answer=${answer}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                return data;
+            } catch (error) {
+                console.error('验证失败:', error);
+                throw error;
+            }
+        }
+
+        // 表单提交
+        document.getElementById('captchaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const answerInput = document.getElementById('answer');
+            const answer = answerInput.value.trim();
+            const submitBtn = document.querySelector('.submit-btn');
+            
+            if (!answer) {
+                showMessage('请输入验证码答案', 'error');
                 return;
             }
             
-            try {
-                const response = await fetch(url);
-                const blob = await response.blob();
-                
-                const downloadUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = `动漫图片_${index}_${new Date().getTime()}.jpg`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(downloadUrl);
-            } catch (error) {
-                console.error('下载失败:', error);
-                alert('下载失败，请重试！');
+            if (!currentCaptchaId) {
+                showMessage('请先获取验证码', 'error');
+                return;
             }
+            
+            // 禁用提交按钮
+            submitBtn.disabled = true;
+            submitBtn.textContent = '验证中...';
+            
+            try {
+                const result = await verifyCaptcha(answer);
+                
+                if (result.code === 200) {
+                    showMessage('✅ 验证成功！', 'success');
+                    answerInput.value = '';
+                    // 验证成功后重新加载验证码
+                    setTimeout(() => {
+                        loadCaptcha();
+                    }, 1500);
+                } else {
+                    showMessage('❌ 验证失败：' + (result.msg || '答案错误，请重试'), 'error');
+                    // 验证失败也重新加载验证码
+                    loadCaptcha();
+                    answerInput.value = '';
+                }
+            } catch (error) {
+                showMessage('❌ 验证请求失败，请重试', 'error');
+                loadCaptcha();
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '验证提交';
+            }
+        });
+
+        // 显示消息
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
         }
 
-        function refreshAllImages() {
-            fetchAllImages();
-        }
-
-        // 页面加载时自动获取图片
-        window.onload = function() {
-            fetchAllImages();
-        };
+        // 回车键也可以刷新验证码
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                e.preventDefault();
+                loadCaptcha();
+            }
+        });
     </script>
 </body>
 </html>
