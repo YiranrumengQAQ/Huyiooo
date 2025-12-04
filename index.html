@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matrix Spiral Cipher - 矩阵螺旋加密</title>
+    <title>随机动漫图片获取器</title>
     <style>
         * {
             margin: 0;
@@ -12,591 +12,359 @@
         }
         
         body {
-            font-family: 'Microsoft YaHei', 'Courier New', monospace;
-            background: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
         
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 25px;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
-            padding: 45px;
-            max-width: 900px;
-            width: 100%;
-            backdrop-filter: blur(10px);
+            max-width: 1400px;
+            margin: 0 auto;
         }
         
         .header {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-        
-        h1 {
-            font-size: 36px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-        
-        .subtitle {
-            color: #666;
-            font-size: 13px;
-            letter-spacing: 1px;
-        }
-        
-        .algorithm-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        
-        .input-section {
-            margin-bottom: 25px;
-        }
-        
-        label {
-            display: block;
-            color: #333;
-            font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 15px;
-        }
-        
-        label::before {
-            content: "▸ ";
-            color: #667eea;
-            font-weight: bold;
-        }
-        
-        textarea, input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 14px;
-            font-family: 'Courier New', monospace;
-            transition: all 0.3s;
-            background: #fafafa;
-        }
-        
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-        
-        textarea:focus, input:focus {
-            outline: none;
-            border-color: #667eea;
             background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2.5em;
         }
         
         .controls {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 25px 0;
-        }
-        
-        button {
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .btn-encrypt {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .btn-decrypt {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        
-        .btn-clear {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-        
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .info-panel {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            border-left: 5px solid #667eea;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 25px;
-        }
-        
-        .info-panel h3 {
-            color: #667eea;
-            margin-bottom: 12px;
-            font-size: 18px;
-        }
-        
-        .info-panel ul {
-            list-style: none;
-            padding-left: 0;
-        }
-        
-        .info-panel li {
-            padding: 8px 0;
-            color: #555;
-            line-height: 1.6;
-        }
-        
-        .info-panel li::before {
-            content: "◆ ";
-            color: #667eea;
-            font-weight: bold;
-            margin-right: 8px;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: flex;
             gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
             margin-top: 20px;
         }
         
-        .stat-box {
+        .image-card {
             background: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            position: relative;
         }
         
-        .stat-value {
-            font-size: 24px;
+        .image-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .image-wrapper {
+            width: 100%;
+            height: 350px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .placeholder {
+            color: #999;
+            font-size: 1.2em;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        
+        .image-wrapper.loading .spinner {
+            display: block;
+        }
+        
+        .image-wrapper.loading .placeholder {
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .image-card .image-footer {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .image-number {
             font-weight: bold;
             color: #667eea;
+            font-size: 1.1em;
         }
         
-        .stat-label {
-            font-size: 12px;
-            color: #999;
-            margin-top: 5px;
+        .download-btn {
+            padding: 8px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #764ba2;
+        }
+        
+        .download-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .image-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 Matrix Spiral Cipher</h1>
-            <p class="subtitle">矩阵螺旋加密系统 - 完全自研算法</p>
-            <span class="algorithm-badge">原创三维矩阵变换加密</span>
-        </div>
-        
-        <div class="input-section">
-            <label>输入文本</label>
-            <textarea id="inputText" placeholder="请输入要加密或解密的文本..."></textarea>
-        </div>
-        
-        <div class="input-section">
-            <label>加密密钥</label>
-            <input type="text" id="secretKey" placeholder="输入您的密钥" value="MyMatrix2025">
-        </div>
-        
-        <div class="controls">
-            <button class="btn-encrypt" onclick="performEncrypt()">🔒 加密</button>
-            <button class="btn-decrypt" onclick="performDecrypt()">🔓 解密</button>
-            <button class="btn-clear" onclick="clearFields()">🗑️ 清空</button>
-        </div>
-        
-        <div class="input-section">
-            <label>输出结果</label>
-            <textarea id="outputText" placeholder="加密/解密结果将显示在这里..." readonly></textarea>
-        </div>
-        
-        <div class="stats">
-            <div class="stat-box">
-                <div class="stat-value" id="inputLen">0</div>
-                <div class="stat-label">输入字符数</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value" id="outputLen">0</div>
-                <div class="stat-label">输出字符数</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value" id="complexity">-</div>
-                <div class="stat-label">复杂度指数</div>
+            <h1>🎨 随机动漫图片获取器</h1>
+            <p style="color: #666; margin-bottom: 20px;">点击按钮一次性获取6张随机动漫图片</p>
+            <div class="controls">
+                <button class="btn" id="fetchBtn" onclick="fetchAllImages()">获取6张图片</button>
+                <button class="btn" id="refreshBtn" onclick="refreshAllImages()">刷新全部</button>
             </div>
         </div>
         
-        <div class="info-panel">
-            <h3>🧮 算法原理说明</h3>
-            <ul>
-                <li><strong>螺旋矩阵填充</strong>：文本按顺时针螺旋路径填入动态矩阵中</li>
-                <li><strong>三维坐标变换</strong>：每个字符映射到(x,y,z)三维空间，基于密钥进行旋转变换</li>
-                <li><strong>动态字符表</strong>：密钥生成唯一的字符映射表，每次加密都不同</li>
-                <li><strong>波函数调制</strong>：使用正弦/余弦函数对字符进行非线性变换</li>
-                <li><strong>分层编码</strong>：矩阵按层级进行不同强度的编码处理</li>
-                <li><strong>校验和保护</strong>：自动添加校验机制，防止数据篡改</li>
-            </ul>
+        <div class="loading" id="loading">
+            <p>正在加载图片，请稍候...</p>
+        </div>
+        
+        <div class="image-grid" id="imageGrid">
+            <!-- 6个固定的展示框 -->
+            <div class="image-card">
+                <div class="image-wrapper" id="wrapper-1">
+                    <div class="spinner"></div>
+                    <div class="placeholder">图片 #1</div>
+                </div>
+                <div class="image-footer">
+                    <span class="image-number">图片 #1</span>
+                    <button class="download-btn" id="download-1" onclick="downloadImage(1)" disabled>下载</button>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <div class="image-wrapper" id="wrapper-2">
+                    <div class="spinner"></div>
+                    <div class="placeholder">图片 #2</div>
+                </div>
+                <div class="image-footer">
+                    <span class="image-number">图片 #2</span>
+                    <button class="download-btn" id="download-2" onclick="downloadImage(2)" disabled>下载</button>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <div class="image-wrapper" id="wrapper-3">
+                    <div class="spinner"></div>
+                    <div class="placeholder">图片 #3</div>
+                </div>
+                <div class="image-footer">
+                    <span class="image-number">图片 #3</span>
+                    <button class="download-btn" id="download-3" onclick="downloadImage(3)" disabled>下载</button>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <div class="image-wrapper" id="wrapper-4">
+                    <div class="spinner"></div>
+                    <div class="placeholder">图片 #4</div>
+                </div>
+                <div class="image-footer">
+                    <span class="image-number">图片 #4</span>
+                    <button class="download-btn" id="download-4" onclick="downloadImage(4)" disabled>下载</button>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <div class="image-wrapper" id="wrapper-5">
+                    <div class="spinner"></div>
+                    <div class="placeholder">图片 #5</div>
+                </div>
+                <div class="image-footer">
+                    <span class="image-number">图片 #5</span>
+                    <button class="download-btn" id="download-5" onclick="downloadImage(5)" disabled>下载</button>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <div class="image-wrapper" id="wrapper-6">
+                    <div class="spinner"></div>
+                    <div class="placeholder">图片 #6</div>
+                </div>
+                <div class="image-footer">
+                    <span class="image-number">图片 #6</span>
+                    <button class="download-btn" id="download-6" onclick="downloadImage(6)" disabled>下载</button>
+                </div>
+            </div>
         </div>
     </div>
-    
+
     <script>
-        // ==================== Matrix Spiral Cipher 核心算法 ====================
-        
-        class MatrixSpiralCipher {
-            constructor(key) {
-                this.key = key || 'DefaultMatrixKey';
-                this.keyHash = this.hashKey(this.key);
+        // 存储图片URL
+        const imageUrls = {};
+
+        async function fetchAllImages() {
+            const fetchBtn = document.getElementById('fetchBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const loading = document.getElementById('loading');
+            
+            fetchBtn.disabled = true;
+            refreshBtn.disabled = true;
+            loading.classList.add('show');
+            
+            // 加载6张图片
+            const promises = [];
+            for (let i = 1; i <= 6; i++) {
+                promises.push(loadImage(i));
             }
             
-            // 密钥哈希函数（生成唯一数值）
-            hashKey(key) {
-                let hash = 0;
-                for (let i = 0; i < key.length; i++) {
-                    const char = key.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + char;
-                    hash = hash & hash; // 转换为32位整数
-                }
-                return Math.abs(hash);
-            }
+            await Promise.all(promises);
             
-            // 计算最佳矩阵尺寸
-            getMatrixSize(length) {
-                const size = Math.ceil(Math.sqrt(length));
-                return size;
-            }
-            
-            // 生成螺旋坐标序列
-            generateSpiralPath(size) {
-                const path = [];
-                let top = 0, bottom = size - 1;
-                let left = 0, right = size - 1;
-                
-                while (top <= bottom && left <= right) {
-                    // 向右
-                    for (let i = left; i <= right; i++) {
-                        path.push([top, i]);
-                    }
-                    top++;
-                    
-                    // 向下
-                    for (let i = top; i <= bottom; i++) {
-                        path.push([i, right]);
-                    }
-                    right--;
-                    
-                    // 向左
-                    if (top <= bottom) {
-                        for (let i = right; i >= left; i--) {
-                            path.push([bottom, i]);
-                        }
-                        bottom--;
-                    }
-                    
-                    // 向上
-                    if (left <= right) {
-                        for (let i = bottom; i >= top; i--) {
-                            path.push([i, left]);
-                        }
-                        left++;
-                    }
-                }
-                
-                return path;
-            }
-            
-            // 三维坐标变换
-            transform3D(char, x, y, keyIndex) {
-                const code = char.charCodeAt(0);
-                const keyByte = this.key.charCodeAt(keyIndex % this.key.length);
-                
-                // 三维旋转变换
-                const theta = (keyByte / 255) * Math.PI * 2;
-                const phi = (x / 10) * Math.PI;
-                
-                // 球坐标变换
-                const r = code;
-                const newX = r * Math.sin(phi) * Math.cos(theta);
-                const newY = r * Math.sin(phi) * Math.sin(theta);
-                const newZ = r * Math.cos(phi);
-                
-                // 组合变换结果
-                const transformed = Math.floor((newX + newY + newZ) / 3) ^ keyByte ^ (x * y);
-                
-                return transformed & 0xFF;
-            }
-            
-            // 波函数调制
-            waveModulation(value, position) {
-                const freq = (this.keyHash % 7) + 3;
-                const wave = Math.sin(position / freq) * 127 + 128;
-                return (value + Math.floor(wave)) & 0xFF;
-            }
-            
-            // 动态字符映射
-            dynamicCharMap(byte, index) {
-                const seed = (this.keyHash + index) % 256;
-                const mapped = ((byte * 37) + seed) ^ (index % 256);
-                return mapped & 0xFF;
-            }
-            
-            // 加密函数
-            encrypt(plaintext) {
-                if (!plaintext) return '';
-                
-                const size = this.getMatrixSize(plaintext.length);
-                const spiral = this.generateSpiralPath(size);
-                
-                // 步骤1：将文本按螺旋路径填入矩阵
-                const matrix = Array(size).fill(null).map(() => Array(size).fill(''));
-                for (let i = 0; i < plaintext.length; i++) {
-                    const [x, y] = spiral[i];
-                    matrix[x][y] = plaintext[i];
-                }
-                
-                // 步骤2：三维变换 + 波函数调制 + 动态映射
-                const encrypted = [];
-                let index = 0;
-                
-                for (let i = 0; i < spiral.length; i++) {
-                    const [x, y] = spiral[i];
-                    const char = matrix[x][y];
-                    
-                    if (char) {
-                        // 三层变换
-                        let byte = this.transform3D(char, x, y, index);
-                        byte = this.waveModulation(byte, index);
-                        byte = this.dynamicCharMap(byte, index);
-                        
-                        encrypted.push(byte);
-                        index++;
-                    }
-                }
-                
-                // 步骤3：添加元数据（矩阵大小 + 校验和）
-                const checksum = this.calculateChecksum(encrypted);
-                const metadata = [size, checksum];
-                
-                // 步骤4：转换为自定义Base编码
-                return this.toCustomBase(metadata.concat(encrypted));
-            }
-            
-            // 解密函数
-            decrypt(ciphertext) {
-                if (!ciphertext) return '';
-                
-                try {
-                    // 步骤1：解码
-                    const bytes = this.fromCustomBase(ciphertext);
-                    
-                    // 步骤2：提取元数据
-                    const size = bytes[0];
-                    const checksum = bytes[1];
-                    const encrypted = bytes.slice(2);
-                    
-                    // 步骤3：校验完整性
-                    if (this.calculateChecksum(encrypted) !== checksum) {
-                        throw new Error('数据校验失败');
-                    }
-                    
-                    // 步骤4：生成螺旋路径
-                    const spiral = this.generateSpiralPath(size);
-                    
-                    // 步骤5：逆向变换
-                    const decrypted = [];
-                    
-                    for (let i = 0; i < encrypted.length; i++) {
-                        const [x, y] = spiral[i];
-                        
-                        // 逆向三层变换
-                        let byte = this.invDynamicCharMap(encrypted[i], i);
-                        byte = this.invWaveModulation(byte, i);
-                        byte = this.invTransform3D(byte, x, y, i);
-                        
-                        decrypted.push(String.fromCharCode(byte));
-                    }
-                    
-                    return decrypted.join('');
-                    
-                } catch (e) {
-                    throw new Error('解密失败：' + e.message);
-                }
-            }
-            
-            // 逆向动态字符映射
-            invDynamicCharMap(byte, index) {
-                const seed = (this.keyHash + index) % 256;
-                // 求逆：byte = ((original * 37) + seed) ^ (index % 256)
-                byte = byte ^ (index % 256);
-                byte = (byte - seed + 256) & 0xFF;
-                // 37的模256乘法逆元是 141
-                byte = (byte * 141) & 0xFF;
-                return byte;
-            }
-            
-            // 逆向波函数调制
-            invWaveModulation(value, position) {
-                const freq = (this.keyHash % 7) + 3;
-                const wave = Math.sin(position / freq) * 127 + 128;
-                return (value - Math.floor(wave) + 256) & 0xFF;
-            }
-            
-            // 逆向三维变换
-            invTransform3D(transformed, x, y, keyIndex) {
-                const keyByte = this.key.charCodeAt(keyIndex % this.key.length);
-                
-                // 逆向XOR
-                let value = transformed ^ keyByte ^ (x * y);
-                
-                // 反向球坐标（近似逆变换）
-                const theta = (keyByte / 255) * Math.PI * 2;
-                const phi = (x / 10) * Math.PI;
-                
-                const cosFactor = Math.cos(theta) * Math.sin(phi);
-                const sinFactor = Math.sin(theta) * Math.sin(phi);
-                const zFactor = Math.cos(phi);
-                
-                const divisor = (cosFactor + sinFactor + zFactor) / 3;
-                const original = divisor !== 0 ? Math.floor(value / divisor) : value;
-                
-                return original & 0xFF;
-            }
-            
-            // 计算校验和
-            calculateChecksum(bytes) {
-                let sum = 0;
-                for (let i = 0; i < bytes.length; i++) {
-                    sum = (sum + bytes[i] * (i + 1)) & 0xFF;
-                }
-                return sum;
-            }
-            
-            // 自定义Base编码（扩展字符集）
-            toCustomBase(bytes) {
-                const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=!@#$%^&*()[]{}';
-                let result = '';
-                
-                for (let i = 0; i < bytes.length; i++) {
-                    const byte = bytes[i];
-                    result += charset[byte % charset.length];
-                    result += charset[Math.floor(byte / charset.length)];
-                }
-                
-                return result;
-            }
-            
-            // 自定义Base解码
-            fromCustomBase(encoded) {
-                const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=!@#$%^&*()[]{}';
-                const bytes = [];
-                
-                for (let i = 0; i < encoded.length; i += 2) {
-                    const low = charset.indexOf(encoded[i]);
-                    const high = charset.indexOf(encoded[i + 1]);
-                    
-                    if (low === -1 || high === -1) {
-                        throw new Error('无效的编码格式');
-                    }
-                    
-                    const byte = (high * charset.length + low) & 0xFF;
-                    bytes.push(byte);
-                }
-                
-                return bytes;
-            }
+            loading.classList.remove('show');
+            fetchBtn.disabled = false;
+            refreshBtn.disabled = false;
         }
-        
-        // ==================== UI 交互函数 ====================
-        
-        function performEncrypt() {
-            const input = document.getElementById('inputText').value;
-            const key = document.getElementById('secretKey').value;
-            
-            if (!input.trim()) {
-                alert('⚠️ 请输入要加密的文本！');
-                return;
-            }
-            
-            if (!key.trim()) {
-                alert('⚠️ 请输入加密密钥！');
+
+        function loadImage(index) {
+            return new Promise((resolve) => {
+                const wrapper = document.getElementById(`wrapper-${index}`);
+                const downloadBtn = document.getElementById(`download-${index}`);
+                
+                // 显示加载动画
+                wrapper.classList.add('loading');
+                
+                // 清除旧图片
+                const oldImg = wrapper.querySelector('img');
+                if (oldImg) {
+                    oldImg.remove();
+                }
+                
+                // 创建新图片
+                const img = document.createElement('img');
+                const timestamp = new Date().getTime();
+                const imageUrl = `https://www.loliapi.com/acg/?t=${timestamp}_${index}`;
+                
+                img.onload = function() {
+                    wrapper.classList.remove('loading');
+                    imageUrls[index] = imageUrl;
+                    downloadBtn.disabled = false;
+                    resolve();
+                };
+                
+                img.onerror = function() {
+                    wrapper.classList.remove('loading');
+                    console.error(`图片 ${index} 加载失败`);
+                    resolve();
+                };
+                
+                img.src = imageUrl;
+                img.alt = `动漫图片 ${index}`;
+                wrapper.appendChild(img);
+            });
+        }
+
+        async function downloadImage(index) {
+            const url = imageUrls[index];
+            if (!url) {
+                alert('图片未加载，请先获取图片！');
                 return;
             }
             
             try {
-                const cipher = new MatrixSpiralCipher(key);
-                const encrypted = cipher.encrypt(input);
+                const response = await fetch(url);
+                const blob = await response.blob();
                 
-                document.getElementById('outputText').value = encrypted;
-                updateStats(input.length, encrypted.length, 'HIGH');
-                
-            } catch (e) {
-                alert('❌ 加密失败：' + e.message);
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `动漫图片_${index}_${new Date().getTime()}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(downloadUrl);
+            } catch (error) {
+                console.error('下载失败:', error);
+                alert('下载失败，请重试！');
             }
         }
-        
-        function performDecrypt() {
-            const input = document.getElementById('inputText').value;
-            const key = document.getElementById('secretKey').value;
-            
-            if (!input.trim()) {
-                alert('⚠️ 请输入要解密的密文！');
-                return;
-            }
-            
-            if (!key.trim()) {
-                alert('⚠️ 请输入解密密钥！');
-                return;
-            }
-            
-            try {
-                const cipher = new MatrixSpiralCipher(key);
-                const decrypted = cipher.decrypt(input);
-                
-                document.getElementById('outputText').value = decrypted;
-                updateStats(input.length, decrypted.length, 'OK');
-                
-            } catch (e) {
-                alert('❌ 解密失败：密钥错误或密文损坏！');
-            }
+
+        function refreshAllImages() {
+            fetchAllImages();
         }
-        
-        function clearFields() {
-            document.getElementById('inputText').value = '';
-            document.getElementById('outputText').value = '';
-            updateStats(0, 0, '-');
-        }
-        
-        function updateStats(inputLen, outputLen, complexity) {
-            document.getElementById('inputLen').textContent = inputLen;
-            document.getElementById('outputLen').textContent = outputLen;
-            document.getElementById('complexity').textContent = complexity;
-        }
-        
-        // 实时统计输入长度
-        document.getElementById('inputText').addEventListener('input', function() {
-            updateStats(this.value.length, document.getElementById('outputText').value.length, '-');
-        });
+
+        // 页面加载时自动获取图片
+        window.onload = function() {
+            fetchAllImages();
+        };
     </script>
 </body>
 </html>
