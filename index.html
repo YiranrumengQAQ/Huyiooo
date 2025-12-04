@@ -3,306 +3,581 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中文数字运算验证码示例</title>
+    <title>Bing 每日壁纸精选</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 头部样式 */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 25px;
+        }
+
+        /* 控制面板 */
+        .controls {
             display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 45px 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 16px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 10px;
+            background: #f7fafc;
+            padding: 5px;
+            border-radius: 50px;
+        }
+
+        .lang-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #4a5568;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 加载动画 */
+        .loader {
+            text-align: center;
+            padding: 50px;
+            display: none;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 瀑布流布局 */
+        .gallery {
+            column-count: 4;
+            column-gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .gallery { column-count: 3; }
+        }
+
+        @media (max-width: 768px) {
+            .gallery { column-count: 2; }
+        }
+
+        @media (max-width: 480px) {
+            .gallery { column-count: 1; }
+        }
+
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            display: block;
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .item-info {
+            padding: 15px;
+        }
+
+        .item-title {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-download:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
-        
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            max-width: 450px;
-            width: 100%;
-        }
-        
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-        
-        .captcha-wrapper {
+
+        .modal.active {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 25px;
-            gap: 15px;
         }
-        
-        #captchaImage {
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: #f5f5f5;
-            min-height: 60px;
-            min-width: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            position: relative;
+            animation: zoomIn 0.3s;
         }
-        
-        .refresh-btn {
-            background: #667eea;
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-title {
             color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .refresh-btn:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        
-        .input-group {
-            margin-bottom: 25px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .submit-btn {
-            width: 100%;
-            background: #764ba2;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .submit-btn:hover {
-            background: #663399;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
-        }
-        
-        .submit-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .message {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
             text-align: center;
-            font-weight: 500;
+            margin-top: 15px;
+            font-size: 18px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            transition: transform 0.3s;
+        }
+
+        .close-modal:hover {
+            transform: rotate(90deg);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: white;
+            font-size: 20px;
             display: none;
         }
-        
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+
+        .no-results.active {
             display: block;
         }
-        
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
+
+        /* 回到顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            z-index: 100;
         }
-        
-        .loading {
-            text-align: center;
-            color: #999;
-            font-size: 14px;
+
+        .back-to-top.active {
+            display: flex;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.6);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔐 中文数字运算验证码</h1>
-        
-        <form id="captchaForm">
-            <div class="captcha-wrapper">
-                <div id="captchaImage">
-                    <span class="loading">点击获取验证码</span>
+        <header>
+            <h1>🌅 Bing 每日壁纸精选</h1>
+            <p class="subtitle">探索全球最美的每日壁纸</p>
+            
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索壁纸标题...">
+                    <span class="search-icon">🔍</span>
                 </div>
-                <button type="button" class="refresh-btn" onclick="loadCaptcha()">
-                    🔄 刷新
-                </button>
+                
+                <div class="language-selector">
+                    <button class="lang-btn active" data-lang="zh-CN_all">🇨🇳 中文</button>
+                    <button class="lang-btn" data-lang="en-US_all">🇺🇸 English</button>
+                    <button class="lang-btn" data-lang="ja-JP_all">🇯🇵 日本語</button>
+                </div>
             </div>
-            
-            <div class="input-group">
-                <label for="answer">请输入验证码计算结果：</label>
-                <input 
-                    type="text" 
-                    id="answer" 
-                    name="answer" 
-                    placeholder="请输入数字答案"
-                    required
-                    autocomplete="off"
-                >
+
+            <div class="stats">
+                <div class="stat-item">
+                    总计: <span id="totalCount">0</span> 张
+                </div>
+                <div class="stat-item">
+                    显示: <span id="displayCount">0</span> 张
+                </div>
             </div>
-            
-            <button type="submit" class="submit-btn">验证提交</button>
-            
-            <div id="message" class="message"></div>
-        </form>
+        </header>
+
+        <div class="loader active">
+            <div class="spinner"></div>
+            <p style="color: white; font-size: 18px;">加载中...</p>
+        </div>
+
+        <div class="gallery" id="gallery"></div>
+
+        <div class="no-results" id="noResults">
+            😔 没有找到匹配的壁纸
+        </div>
     </div>
 
+    <!-- 图片预览模态框 -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">×</button>
+            <img id="modalImage" src="" alt="">
+            <div class="modal-title" id="modalTitle"></div>
+        </div>
+    </div>
+
+    <!-- 回到顶部 -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</button>
+
     <script>
-        // API配置
-        const API_URL = 'https://v2.xxapi.cn/api/chineseCaptcha';
-        let currentCaptchaId = '';
+        let allWallpapers = [];
+        let filteredWallpapers = [];
+        let currentLang = 'zh-CN_all';
 
-        // 页面加载时获取验证码
-        window.onload = function() {
-            loadCaptcha();
-        };
-
-        // 获取验证码
-        async function loadCaptcha() {
-            const captchaImage = document.getElementById('captchaImage');
-            const messageDiv = document.getElementById('message');
+        // 加载壁纸数据
+        async function loadWallpapers(lang) {
+            const loader = document.querySelector('.loader');
+            const gallery = document.getElementById('gallery');
+            const noResults = document.getElementById('noResults');
             
+            loader.classList.add('active');
+            gallery.innerHTML = '';
+            noResults.classList.remove('active');
+
             try {
-                captchaImage.innerHTML = '<span class="loading">加载中...</span>';
-                messageDiv.style.display = 'none';
-                
-                const response = await fetch(API_URL);
+                const response = await fetch(`https://raw.onmicrosoft.cn/Bing-Wallpaper-Action/main/data/${lang}.json`);
                 const data = await response.json();
                 
-                if (data.code === 200 && data.data) {
-                    currentCaptchaId = data.data.id;
-                    captchaImage.innerHTML = `<img src="${data.data.url}" alt="验证码" style="max-width: 100%; border-radius: 6px;">`;
-                } else {
-                    throw new Error(data.msg || '获取验证码失败');
-                }
-            } catch (error) {
-                console.error('加载验证码失败:', error);
-                captchaImage.innerHTML = '<span style="color: #e74c3c;">❌ 加载失败</span>';
-                showMessage('获取验证码失败，请刷新重试', 'error');
-            }
-        }
-
-        // 验证验证码
-        async function verifyCaptcha(answer) {
-            try {
-                const url = `${API_URL}?type=verify&id=${currentCaptchaId}&answer=${answer}`;
-                const response = await fetch(url);
-                const data = await response.json();
+                allWallpapers = data;
+                filteredWallpapers = data;
                 
-                return data;
+                displayWallpapers(filteredWallpapers);
+                updateStats();
             } catch (error) {
-                console.error('验证失败:', error);
-                throw error;
-            }
-        }
-
-        // 表单提交
-        document.getElementById('captchaForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const answerInput = document.getElementById('answer');
-            const answer = answerInput.value.trim();
-            const submitBtn = document.querySelector('.submit-btn');
-            
-            if (!answer) {
-                showMessage('请输入验证码答案', 'error');
-                return;
-            }
-            
-            if (!currentCaptchaId) {
-                showMessage('请先获取验证码', 'error');
-                return;
-            }
-            
-            // 禁用提交按钮
-            submitBtn.disabled = true;
-            submitBtn.textContent = '验证中...';
-            
-            try {
-                const result = await verifyCaptcha(answer);
-                
-                if (result.code === 200) {
-                    showMessage('✅ 验证成功！', 'success');
-                    answerInput.value = '';
-                    // 验证成功后重新加载验证码
-                    setTimeout(() => {
-                        loadCaptcha();
-                    }, 1500);
-                } else {
-                    showMessage('❌ 验证失败：' + (result.msg || '答案错误，请重试'), 'error');
-                    // 验证失败也重新加载验证码
-                    loadCaptcha();
-                    answerInput.value = '';
-                }
-            } catch (error) {
-                showMessage('❌ 验证请求失败，请重试', 'error');
-                loadCaptcha();
+                console.error('加载失败:', error);
+                gallery.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">加载失败，请稍后重试</div>';
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '验证提交';
+                loader.classList.remove('active');
             }
-        });
-
-        // 显示消息
-        function showMessage(text, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = 'message ' + type;
-            messageDiv.style.display = 'block';
-            
-            // 3秒后自动隐藏
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 3000);
         }
 
-        // 回车键也可以刷新验证码
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
-                e.preventDefault();
-                loadCaptcha();
+        // 显示壁纸
+        function displayWallpapers(wallpapers) {
+            const gallery = document.getElementById('gallery');
+            const noResults = document.getElementById('noResults');
+            
+            gallery.innerHTML = '';
+
+            if (wallpapers.length === 0) {
+                noResults.classList.add('active');
+                return;
+            }
+
+            noResults.classList.remove('active');
+
+            wallpapers.forEach((wallpaper, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.style.animationDelay = `${index * 0.05}s`;
+                
+                // 构建完整的图片URL
+                const imageUrl = wallpaper.url.startsWith('http') ? wallpaper.url : `https://www.bing.com${wallpaper.url}`;
+                
+                item.innerHTML = `
+                    <img src="${imageUrl}" alt="${wallpaper.title}" loading="lazy" onclick="openModal('${imageUrl}', '${wallpaper.title.replace(/'/g, "\\'")}')">
+                    <div class="item-info">
+                        <div class="item-title">${wallpaper.title}</div>
+                        <div class="item-actions">
+                            <button class="btn btn-download" onclick="downloadImage('${imageUrl}', '${wallpaper.title.replace(/'/g, "\\'")}')">
+                                ⬇️ 下载
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                gallery.appendChild(item);
+            });
+        }
+
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            filteredWallpapers = allWallpapers.filter(wallpaper => 
+                wallpaper.title.toLowerCase().includes(searchTerm)
+            );
+            
+            displayWallpapers(filteredWallpapers);
+            updateStats();
+        });
+
+        // 语言切换
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                currentLang = btn.dataset.lang;
+                document.getElementById('searchInput').value = '';
+                loadWallpapers(currentLang);
+            });
+        });
+
+        // 更新统计数据
+        function updateStats() {
+            document.getElementById('totalCount').textContent = allWallpapers.length;
+            document.getElementById('displayCount').textContent = filteredWallpapers.length;
+        }
+
+        // 打开模态框
+        function openModal(imageUrl, title) {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            modalImage.src = imageUrl;
+            modalTitle.textContent = title;
+            modal.classList.add('active');
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 点击模态框背景关闭
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
             }
         });
+
+        // ESC键关闭模态框
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // 下载图片
+        function downloadImage(url, title) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${title}.jpg`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 回到顶部
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // 显示/隐藏回到顶部按钮
+        window.addEventListener('scroll', () => {
+            const backToTop = document.getElementById('backToTop');
+            if (window.pageYOffset > 300) {
+                backToTop.classList.add('active');
+            } else {
+                backToTop.classList.remove('active');
+            }
+        });
+
+        // 初始化加载
+        loadWallpapers(currentLang);
     </script>
 </body>
 </html>
