@@ -3,598 +3,1222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片搜索 - 百度图片搜索API</title>
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'none'">
+    <title>图虫摄影作品展示</title>
     <style>
+        /* 防选择复制 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
             min-height: 100vh;
-            padding: 20px;
+            color: #333;
         }
 
-        .container {
-            max-width: 1200px;
+        /* 水印层 */
+        body::before {
+            content: '版权所有 - 请勿盗用';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 3rem;
+            color: rgba(66, 165, 245, 0.05);
+            pointer-events: none;
+            z-index: 9998;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%);
+            color: white;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 20px rgba(66, 165, 245, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header-content {
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* 头部样式 */
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            animation: fadeInDown 0.8s ease-out;
-        }
-
         .header h1 {
-            color: white;
             font-size: 2.5rem;
-            margin-bottom: 10px;
+            margin-bottom: 1rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            text-align: center;
         }
 
-        .header p {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.1rem;
-        }
-
-        /* 搜索卡片 */
-        .search-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            margin-bottom: 40px;
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .search-form {
-            display: grid;
-            grid-template-columns: 1fr auto auto;
-            gap: 15px;
-            align-items: end;
-        }
-
-        .form-group {
+        .controls {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1.5rem;
         }
 
-        .form-group label {
-            color: #4a5568;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
         }
 
-        .form-group input {
-            padding: 12px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 3rem 0.8rem 1rem;
+            border: none;
+            border-radius: 25px;
             font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
-            outline: none;
         }
 
-        .form-group input:focus {
-            border-color: #4299e1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        .search-box input:focus {
+            outline: none;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
             transform: translateY(-2px);
         }
 
-        .btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #42a5f5;
             color: white;
             border: none;
-            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: #1976d2;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .view-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .view-btn.active {
+            background: #42a5f5;
+            color: white;
+        }
+
+        .sort-select {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #666;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #42a5f5;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
+        .stats-bar {
             background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-            box-shadow: none;
-        }
-
-        .btn-secondary:hover {
-            background: #f7fafc;
-        }
-
-        /* 加载动画 */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .loading.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e2e8f0;
-            border-top-color: #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        /* 结果网格 */
-        .results {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        .image-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            animation: fadeInUp 0.5s ease-out;
-            animation-fill-mode: both;
-        }
-
-        .image-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-
-        .image-wrapper {
-            position: relative;
-            width: 100%;
-            height: 250px;
-            overflow: hidden;
-            background: #f7fafc;
-        }
-
-        .image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .image-card:hover .image-wrapper img {
-            transform: scale(1.1);
-        }
-
-        .image-info {
-            padding: 20px;
-        }
-
-        .image-title {
-            color: #2d3748;
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .image-meta {
+            padding: 1rem;
+            margin: 1rem auto;
+            max-width: 1400px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             display: flex;
-            justify-content: space-between;
-            color: #718096;
-            font-size: 0.85rem;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
-        .image-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .btn-small {
-            flex: 1;
-            padding: 8px 15px;
-            font-size: 0.85rem;
-            border-radius: 8px;
-        }
-
-        /* 空状态 */
-        .empty-state {
-            display: none;
+        .stat-item {
             text-align: center;
-            padding: 60px 20px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #42a5f5;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .filter-panel {
             background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .filter-panel.active {
+            max-height: 500px;
+        }
+
+        .filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .filter-tag {
+            padding: 0.6rem 1.2rem;
+            border: 2px solid #e3f2fd;
             border-radius: 20px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .empty-state.active {
-            display: block;
-        }
-
-        .empty-state svg {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .empty-state h3 {
-            color: #4a5568;
-            margin-bottom: 10px;
-        }
-
-        .empty-state p {
-            color: #718096;
-        }
-
-        /* 分页 */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 40px;
-            padding: 20px;
-        }
-
-        .page-btn {
-            padding: 10px 20px;
             background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-            border-radius: 10px;
+            color: #666;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-weight: 600;
+            font-weight: 500;
         }
 
-        .page-btn:hover {
-            background: #667eea;
+        .filter-tag:hover, .filter-tag.active {
+            background: #42a5f5;
             color: white;
+            border-color: #42a5f5;
             transform: translateY(-2px);
         }
 
-        .page-btn.active {
-            background: #667eea;
-            color: white;
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
         }
 
-        /* 响应式 */
-        @media (max-width: 768px) {
-            .search-form {
-                grid-template-columns: 1fr;
-            }
+        .gallery.list-view {
+            grid-template-columns: 1fr;
+        }
 
+        .gallery.grid-view-large {
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        }
+
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
             .header h1 {
                 font-size: 1.8rem;
             }
-
-            .search-card {
-                padding: 25px;
+            .controls {
+                flex-direction: column;
             }
-
-            .results {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 15px;
-            }
-
-            .image-wrapper {
-                height: 180px;
+            .search-box {
+                max-width: 100%;
             }
         }
 
-        /* 动画 */
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(66, 165, 245, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease-out forwards;
+            position: relative;
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 40px rgba(66, 165, 245, 0.25);
+        }
+
+        .card.favorited::before {
+            content: '❤️';
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 1.5rem;
+            z-index: 10;
+            animation: heartbeat 1s ease infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .card-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .list-view .card {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .list-view .card-image-container {
+            width: 300px;
+            padding-top: 0;
+            height: 250px;
+            flex-shrink: 0;
+        }
+
+        .card-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.4s ease;
+            pointer-events: none;
+        }
+
+        .card-image.loaded {
+            opacity: 1;
+        }
+
+        .card:hover .card-image {
+            transform: scale(1.05);
+        }
+
+        .image-skeleton {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #e3f2fd 25%, #bbdefb 50%, #e3f2fd 75%);
+            background-size: 200% 100%;
+            animation: skeleton 1.5s ease-in-out infinite;
+        }
+
+        @keyframes skeleton {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            padding: 1rem;
+            color: white;
+        }
+
+        .card-image-container:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .action-buttons {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+
+        .card-image.loaded ~ .action-buttons {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.95);
+            color: #42a5f5;
+            border: none;
+            padding: 0.6rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background: #42a5f5;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .action-btn.favorited {
+            background: #f44336;
+            color: white;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.8rem;
+        }
+
+        .date {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .card-title:hover {
+            color: #42a5f5;
+        }
+
+        .card-stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+        }
+
+        .stat:hover {
+            background: #e3f2fd;
+            color: #42a5f5;
+            transform: scale(1.05);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #1976d2;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            background: #42a5f5;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .author {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e3f2fd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin: 0 -0.5rem;
+        }
+
+        .author:hover {
+            background: #f5f5f5;
+        }
+
+        .author-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #42a5f5;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 0.2rem;
+        }
+
+        .author-followers {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .author-follow-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #42a5f5;
+            background: white;
+            color: #42a5f5;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .author-follow-btn:hover, .author-follow-btn.following {
+            background: #42a5f5;
+            color: white;
+        }
+
+        .expand-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: #f5f5f5;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .card-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 1rem;
+        }
+
+        .card-details.expanded {
+            max-height: 300px;
+            padding: 1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .load-more {
+            display: block;
+            margin: 3rem auto;
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(66, 165, 245, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: white;
+            color: #333;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: #42a5f5;
+        }
+
+        .spinner {
+            border: 4px solid #e3f2fd;
+            border-top: 4px solid #42a5f5;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
 
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* 延迟动画 */
-        .image-card:nth-child(1) { animation-delay: 0.1s; }
-        .image-card:nth-child(2) { animation-delay: 0.2s; }
-        .image-card:nth-child(3) { animation-delay: 0.3s; }
-        .image-card:nth-child(4) { animation-delay: 0.4s; }
-        .image-card:nth-child(5) { animation-delay: 0.5s; }
-        .image-card:nth-child(n+6) { animation-delay: 0.6s; }
-
-        /* 通知 */
-        .notification {
+        .toast {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* 防调试样式 */
+        .dev-warning {
             display: none;
-            animation: slideInRight 0.3s ease;
-            z-index: 1000;
-        }
-
-        .notification.active {
-            display: block;
-        }
-
-        .notification.error {
-            border-left: 4px solid #f56565;
-        }
-
-        .notification.success {
-            border-left: 4px solid #48bb78;
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f44336;
+            color: white;
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
+    <div class="dev-warning" id="devWarning">
+        🚫 检测到非法访问！
+    </div>
+
+    <div class="header">
+        <div class="header-content">
+            <h1>📷 图虫摄影作品展示</h1>
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索标题、作者、标签...">
+                    <button class="search-btn" onclick="_0x3a4f[0]()">🔍</button>
+                </div>
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="grid" onclick="_0x3a4f[1]('grid')">🔲 网格</button>
+                    <button class="view-btn" data-view="grid-large" onclick="_0x3a4f[1]('grid-large')">🖼️ 大图</button>
+                    <button class="view-btn" data-view="list" onclick="_0x3a4f[1]('list')">📋 列表</button>
+                </div>
+                <select class="sort-select" id="sortSelect" onchange="_0x3a4f[2]()">
+                    <option value="latest">最新发布</option>
+                    <option value="popular">最受欢迎</option>
+                    <option value="comments">评论最多</option>
+                </select>
+                <button class="filter-btn" onclick="_0x3a4f[3]()">🎨 筛选标签</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-value" id="totalPhotos">0</div>
+            <div class="stat-label">作品总数</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="totalFavorites">0</div>
+            <div class="stat-label">总收藏数</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="totalAuthors">0</div>
+            <div class="stat-label">摄影师</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="myFavorites">0</div>
+            <div class="stat-label">我的收藏</div>
+        </div>
+    </div>
+
     <div class="container">
-        <!-- 头部 -->
-        <div class="header">
-            <h1>🔍 图片搜索</h1>
-            <p>基于百度图片搜索API,快速找到您需要的图片</p>
+        <div class="filter-panel" id="filterPanel">
+            <h3 style="margin-bottom: 1rem; color: #42a5f5;">🏷️ 按标签筛选</h3>
+            <div class="filter-tags" id="filterTags">
+                <div class="filter-tag" data-tag="all" onclick="_0x3a4f[4]('all')">全部</div>
+            </div>
         </div>
 
-        <!-- 搜索表单 -->
-        <div class="search-card">
-            <form class="search-form" id="searchForm">
-                <div class="form-group">
-                    <label for="keyword">搜索关键词</label>
-                    <input type="text" id="keyword" placeholder="请输入搜索关键词" required>
-                </div>
-                <div class="form-group">
-                    <label for="page">页码</label>
-                    <input type="number" id="page" value="1" min="1" max="100">
-                </div>
-                <button type="submit" class="btn">搜索</button>
-                <button type="button" class="btn btn-secondary" onclick="clearResults()">清空</button>
-            </form>
-        </div>
-
-        <!-- 加载状态 -->
-        <div class="loading" id="loading">
+        <div id="loading" class="loading">
             <div class="spinner"></div>
-            <p style="color: white; font-size: 1.1rem;">正在搜索中...</p>
+            <p>正在加载精彩作品...</p>
         </div>
 
-        <!-- 空状态 -->
-        <div class="empty-state" id="emptyState">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <h3>还没有搜索结果</h3>
-            <p>请在上方输入关键词开始搜索</p>
+        <div id="gallery" class="gallery"></div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <div class="no-results-icon">🔍</div>
+            <h2>未找到相关作品</h2>
+            <p>尝试调整搜索条件或筛选标签</p>
         </div>
 
-        <!-- 结果展示 -->
-        <div class="results" id="results"></div>
-
-        <!-- 分页 -->
-        <div class="pagination" id="pagination" style="display: none;"></div>
+        <button id="loadMore" class="load-more" style="display:none;">加载更多作品</button>
     </div>
 
-    <!-- 通知 -->
-    <div class="notification" id="notification">
-        <div id="notificationText"></div>
+    <div class="modal" id="imageModal" onclick="_0x3a4f[5]()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="_0x3a4f[5]()">✕ 关闭</button>
+            <img class="modal-image" id="modalImage" src="" alt="">
+        </div>
     </div>
+
+    <div class="toast" id="toast"></div>
 
     <script>
-        const API_URL = 'https://zj.v.api.aa1.cn/api/so-baidu-img/';
-        let currentKeyword = '';
-        let currentPage = 1;
-
-        // 表单提交
-        document.getElementById('searchForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const keyword = document.getElementById('keyword').value.trim();
-            const page = parseInt(document.getElementById('page').value);
+        // 防调试保护
+        (function() {
+            'use strict';
             
-            if (!keyword) {
-                showNotification('请输入搜索关键词', 'error');
-                return;
+            // 检测域名（可选 - 如果你想限制只在特定域名运行）
+            const _0x5f2d = ['localhost', '127.0.0.1', 'your-domain.com'];
+            const _0x1a8c = window.location.hostname;
+            // if (!_0x5f2d.some(d => _0x1a8c.includes(d))) {
+            //     document.body.innerHTML = '<h1 style="text-align:center;margin-top:20%;">⚠️ 未授权访问</h1>';
+            //     return;
+            // }
+
+            // 防iframe嵌套
+            if (window.self !== window.top) {
+                window.top.location = window.self.location;
             }
 
-            currentKeyword = keyword;
-            currentPage = page;
-            searchImages(keyword, page);
-        });
+            // 禁用右键
+            document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // 搜索图片
-        async function searchImages(keyword, page) {
-            const loading = document.getElementById('loading');
-            const results = document.getElementById('results');
-            const emptyState = document.getElementById('emptyState');
-            const pagination = document.getElementById('pagination');
-
-            // 显示加载状态
-            loading.classList.add('active');
-            results.innerHTML = '';
-            emptyState.classList.remove('active');
-            pagination.style.display = 'none';
-
-            try {
-                const response = await fetch(`${API_URL}?msg=${encodeURIComponent(keyword)}&page=${page}`);
-                const data = await response.json();
-
-                loading.classList.remove('active');
-
-                if (data.code === '200' && data.data && data.data.length > 0) {
-                    displayResults(data.data);
-                    showPagination(page);
-                    showNotification(`找到 ${data.data.length} 张图片`, 'success');
-                } else {
-                    emptyState.classList.add('active');
-                    showNotification('没有找到相关图片', 'error');
+            // 禁用特定快捷键
+            document.addEventListener('keydown', e => {
+                if (e.keyCode === 123 || // F12
+                    (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+                    (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
+                    (e.ctrlKey && e.keyCode === 85) || // Ctrl+U
+                    (e.ctrlKey && e.keyCode === 83)) { // Ctrl+S
+                    e.preventDefault();
+                    return false;
                 }
-            } catch (error) {
-                loading.classList.remove('active');
-                emptyState.classList.add('active');
-                showNotification('搜索失败,请稍后重试', 'error');
-                console.error('Error:', error);
+            });
+
+            // 检测开发者工具
+            let _0x9c7b = false;
+            const _0x4e1a = setInterval(() => {
+                const _0x8d3f = new Date();
+                debugger;
+                const _0x2b6c = new Date() - _0x8d3f;
+                if (_0x2b6c > 100) {
+                    if (!_0x9c7b) {
+                        _0x9c7b = true;
+                        document.getElementById('devWarning').style.display = 'flex';
+                        setTimeout(() => {
+                            window.location.href = 'about:blank';
+                        }, 2000);
+                    }
+                }
+            }, 1000);
+
+            // 控制台警告
+            console.log('%c⚠️ 警告！', 'color: red; font-size: 40px; font-weight: bold;');
+            console.log('%c请勿在此处粘贴任何代码！\n这可能导致您的账户被盗！', 'color: #333; font-size: 16px;');
+
+            // 检测控制台打开
+            const _0x7a2e = () => {
+                const _0x3c9d = window.outerWidth - window.innerWidth > 160;
+                const _0x6f1b = window.outerHeight - window.innerHeight > 160;
+                if (_0x3c9d || _0x6f1b) {
+                    document.getElementById('devWarning').style.display = 'flex';
+                }
+            };
+            window.addEventListener('resize', _0x7a2e);
+
+        })();
+
+        // 核心代码混淆
+        const _0x4d8a = {
+            photos: [],
+            displayed: [],
+            postId: null,
+            loading: false,
+            view: 'grid',
+            sort: 'latest',
+            filter: 'all',
+            favorites: new Set(JSON.parse(localStorage.getItem('_0xf4v') || '[]')),
+            following: new Set(JSON.parse(localStorage.getItem('_0xf0l') || '[]')),
+            tags: new Set()
+        };
+
+        // 函数映射表（部分混淆）
+        const _0x3a4f = [
+            function() { /* performSearch */ 
+                const q = document.getElementById('searchInput').value.toLowerCase();
+                _0x4d8a.displayed = !q ? [..._0x4d8a.photos] : _0x4d8a.photos.filter(p => 
+                    (p.title && p.title.toLowerCase().includes(q)) ||
+                    (p.tags && p.tags.toLowerCase().includes(q)) ||
+                    (p.site && p.site.name.toLowerCase().includes(q))
+                );
+                _0x6b2c();
+                _0x8e4a(`🔍 找到 ${_0x4d8a.displayed.length} 个结果`);
+            },
+            function(v) { /* changeView */
+                _0x4d8a.view = v;
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === v);
+                });
+                const g = document.getElementById('gallery');
+                g.className = 'gallery';
+                if (v === 'list') g.classList.add('list-view');
+                else if (v === 'grid-large') g.classList.add('grid-view-large');
+            },
+            function() { /* sortPhotos */
+                _0x4d8a.sort = document.getElementById('sortSelect').value;
+                _0x2e7d();
+            },
+            function() { /* toggleFilter */
+                document.getElementById('filterPanel').classList.toggle('active');
+            },
+            function(tag) { /* filterByTag */
+                _0x4d8a.filter = tag;
+                document.querySelectorAll('.filter-tag').forEach(el => {
+                    el.classList.toggle('active', el.dataset.tag === tag);
+                });
+                _0x2e7d();
+            },
+            function() { /* closeModal */
+                document.getElementById('imageModal').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        ];
+
+        // API请求函数（混淆）
+        async function _0x1f9e() {
+            if (_0x4d8a.loading) return;
+            _0x4d8a.loading = true;
+            try {
+                const url = _0x4d8a.postId 
+                    ? `${'https://api.tu'}${'chong.com/feed-app?post_id='}${_0x4d8a.postId}`
+                    : `${'https://api.tu'}${'chong.com/feed-app'}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.feedList && data.feedList.length > 0) {
+                    _0x4d8a.photos = _0x4d8a.photos.concat(data.feedList);
+                    _0x5c3b(data.feedList);
+                    _0x2e7d();
+                    _0x4d8a.postId = data.feedList[data.feedList.length - 1].post_id;
+                    document.getElementById('loadMore').style.display = 'block';
+                    _0x9d7a();
+                }
+                document.getElementById('loading').style.display = 'none';
+            } catch (e) {
+                _0x8e4a('❌ 加载失败，请稍后重试');
+            } finally {
+                _0x4d8a.loading = false;
             }
         }
 
-        // 显示结果
-        function displayResults(images) {
-            const results = document.getElementById('results');
-            results.innerHTML = '';
+        // 提取标签
+        function _0x5c3b(photos) {
+            photos.forEach(p => {
+                if (p.tags) {
+                    p.tags.split(',').forEach(t => {
+                        const tr = t.trim();
+                        if (tr) _0x4d8a.tags.add(tr);
+                    });
+                }
+            });
+            _0x7f8c();
+        }
 
-            images.forEach((image, index) => {
-                const card = document.createElement('div');
-                card.className = 'image-card';
-                card.innerHTML = `
-                    <div class="image-wrapper">
-                        <img src="${image.thumbnailUrl || image.hoverUrl}" 
-                             alt="${image.oriTitle || '图片'}"
-                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3E加载失败%3C/text%3E%3C/svg%3E'">
-                    </div>
-                    <div class="image-info">
-                        <div class="image-title">${image.oriTitle || '未知标题'}</div>
-                        <div class="image-meta">
-                            <span>📐 ${image.width} × ${image.height}</span>
-                        </div>
-                        <div class="image-actions">
-                            <button class="btn btn-small" onclick="viewImage('${image.hoverUrl}')">查看原图</button>
-                            <button class="btn btn-small btn-secondary" onclick="downloadImage('${image.hoverUrl}', '${image.oriTitle}')">下载</button>
-                        </div>
-                    </div>
-                `;
-                results.appendChild(card);
+        // 渲染标签
+        function _0x7f8c() {
+            const c = document.getElementById('filterTags');
+            const e = c.querySelectorAll('.filter-tag:not([data-tag="all"])');
+            e.forEach(t => t.remove());
+            Array.from(_0x4d8a.tags).slice(0, 20).forEach(tag => {
+                const el = document.createElement('div');
+                el.className = 'filter-tag';
+                el.dataset.tag = tag;
+                el.textContent = tag;
+                el.onclick = () => _0x3a4f[4](tag);
+                c.appendChild(el);
             });
         }
 
-        // 显示分页
-        function showPagination(currentPage) {
-            const pagination = document.getElementById('pagination');
-            pagination.style.display = 'flex';
-            pagination.innerHTML = '';
-
-            if (currentPage > 1) {
-                const prevBtn = document.createElement('button');
-                prevBtn.className = 'page-btn';
-                prevBtn.textContent = '上一页';
-                prevBtn.onclick = () => {
-                    document.getElementById('page').value = currentPage - 1;
-                    searchImages(currentKeyword, currentPage - 1);
-                };
-                pagination.appendChild(prevBtn);
+        // 应用筛选和排序
+        function _0x2e7d() {
+            _0x4d8a.displayed = _0x4d8a.photos.filter(p => {
+                if (_0x4d8a.filter === 'all') return true;
+                return p.tags && p.tags.includes(_0x4d8a.filter);
+            });
+            if (_0x4d8a.sort === 'popular') {
+                _0x4d8a.displayed.sort((a, b) => (b.favorites || 0) - (a.favorites || 0));
+            } else if (_0x4d8a.sort === 'comments') {
+                _0x4d8a.displayed.sort((a, b) => (b.comments || 0) - (a.comments || 0));
             }
-
-            const currentBtn = document.createElement('button');
-            currentBtn.className = 'page-btn active';
-            currentBtn.textContent = currentPage;
-            pagination.appendChild(currentBtn);
-
-            const nextBtn = document.createElement('button');
-            nextBtn.className = 'page-btn';
-            nextBtn.textContent = '下一页';
-            nextBtn.onclick = () => {
-                document.getElementById('page').value = currentPage + 1;
-                searchImages(currentKeyword, currentPage + 1);
-            };
-            pagination.appendChild(nextBtn);
+            _0x6b2c();
         }
 
-        // 查看原图
-        function viewImage(url) {
-            window.open(url, '_blank');
+        // 渲染画廊
+        function _0x6b2c() {
+            const g = document.getElementById('gallery');
+            g.innerHTML = '';
+            if (_0x4d8a.displayed.length === 0) {
+                document.getElementById('noResults').style.display = 'block';
+                return;
+            }
+            document.getElementById('noResults').style.display = 'none';
+            _0x4d8a.displayed.forEach((p, i) => {
+                if (!p.images || p.images.length === 0) return;
+                const card = _0xa3c7(p, i);
+                g.appendChild(card);
+            });
         }
 
-        // 下载图片
-        function downloadImage(url, title) {
+        // 创建卡片（核心渲染函数）
+        function _0xa3c7(photo, index) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            if (_0x4d8a.favorites.has(photo.post_id)) card.classList.add('favorited');
+            card.style.animationDelay = `${(index % 10) * 0.1}s`;
+            card.dataset.postId = photo.post_id;
+
+            const img = photo.images[0];
+            const imgUrl = `https://photo.tuchong.com/${img.user_id}/f/${img.img_id}.jpg`;
+            const date = new Date(photo.published_at).toLocaleDateString('zh-CN', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+            const tags = photo.tags ? photo.tags.split(',').slice(0, 4) : [];
+
+            card.innerHTML = `
+                <div class="card-image-container" onclick="_0xb5d4('${imgUrl}')">
+                    <div class="image-skeleton"></div>
+                    <img class="card-image" data-src="${imgUrl}" alt="${photo.title || '摄影作品'}">
+                    <div class="image-overlay"><span>🔍 点击查看大图</span></div>
+                    <div class="action-buttons">
+                        <button class="action-btn ${_0x4d8a.favorites.has(photo.post_id) ? 'favorited' : ''}" 
+                                onclick="event.stopPropagation(); _0xc8e2(${photo.post_id})">
+                            ${_0x4d8a.favorites.has(photo.post_id) ? '❤️' : '🤍'}
+                        </button>
+                        <button class="action-btn" onclick="event.stopPropagation(); _0xd9f3('${imgUrl}', '${img.img_id}')">⬇️</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); _0xea04(${photo.post_id})">📤</button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="card-header"><div class="date">📅 ${date}</div></div>
+                    <h3 class="card-title" onclick="_0xb5d4('${imgUrl}')">${photo.title || '精彩摄影作品'}</h3>
+                    <div class="card-stats">
+                        <div class="stat" onclick="_0xfb15(${photo.post_id})">❤️ <span id="fav-${photo.post_id}">${photo.favorites || 0}</span></div>
+                        <div class="stat">💬 ${photo.comments || 0}</div>
+                        <div class="stat">👁️ ${Math.floor(Math.random() * 10000)}</div>
+                    </div>
+                    ${tags.length > 0 ? `<div class="tags">${tags.map(t => `<span class="tag" onclick="_0x3a4f[4]('${t.trim()}')">#${t.trim()}</span>`).join('')}</div>` : ''}
+                    ${photo.site ? `
+                    <div class="author">
+                        <img class="author-avatar" src="${photo.site.icon}" alt="${photo.site.name}">
+                        <div class="author-info">
+                            <div class="author-name">${photo.site.name}</div>
+                            <div class="author-followers">👥 ${photo.site.followers || 0} 粉丝</div>
+                        </div>
+                        <button class="author-follow-btn ${_0x4d8a.following.has(photo.site.name) ? 'following' : ''}" 
+                                onclick="event.stopPropagation(); _0x1c26('${photo.site.name}')">
+                            ${_0x4d8a.following.has(photo.site.name) ? '✓ 已关注' : '+ 关注'}
+                        </button>
+                    </div>` : ''}
+                    <button class="expand-btn" onclick="_0x2d37(${photo.post_id})">📊 查看详细信息</button>
+                    <div class="card-details" id="details-${photo.post_id}">
+                        <div class="detail-row"><span>作品ID</span><span>${photo.post_id}</span></div>
+                        <div class="detail-row"><span>图片尺寸</span><span>${img.width} × ${img.height}</span></div>
+                        <div class="detail-row"><span>发布时间</span><span>${new Date(photo.published_at).toLocaleString('zh-CN')}</span></div>
+                    </div>
+                </div>
+            `;
+
+            // 图片懒加载
+            const imgEl = card.querySelector('.card-image');
+            const skeleton = card.querySelector('.image-skeleton');
+            const obs = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const i = new Image();
+                        i.onload = () => {
+                            imgEl.src = imgEl.dataset.src;
+                            imgEl.classList.add('loaded');
+                            skeleton.style.display = 'none';
+                        };
+                        i.onerror = () => {
+                            skeleton.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;">图片加载失败</div>';
+                        };
+                        i.src = imgEl.dataset.src;
+                        obs.unobserve(imgEl);
+                    }
+                });
+            }, { threshold: 0.1 });
+            obs.observe(imgEl);
+
+            return card;
+        }
+
+        // 辅助函数（混淆命名）
+        function _0xb5d4(url) { // openModal
+            document.getElementById('modalImage').src = url;
+            document.getElementById('imageModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function _0xc8e2(id) { // toggleFavorite
+            if (_0x4d8a.favorites.has(id)) {
+                _0x4d8a.favorites.delete(id);
+                _0x8e4a('💔 已取消收藏');
+            } else {
+                _0x4d8a.favorites.add(id);
+                _0x8e4a('❤️ 已添加到收藏');
+            }
+            localStorage.setItem('_0xf4v', JSON.stringify([..._0x4d8a.favorites]));
+            _0x9d7a();
+            const card = document.querySelector(`[data-post-id="${id}"]`);
+            if (card) {
+                card.classList.toggle('favorited');
+                const btn = card.querySelector('.action-btn');
+                if (btn) {
+                    btn.textContent = _0x4d8a.favorites.has(id) ? '❤️' : '🤍';
+                    btn.classList.toggle('favorited');
+                }
+            }
+        }
+
+        function _0xd9f3(url, id) { // downloadImage
             const a = document.createElement('a');
             a.href = url;
-            a.download = title || 'image.jpg';
+            a.download = `tuchong_${id}.jpg`;
             a.target = '_blank';
-            document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
-            showNotification('正在下载图片...', 'success');
+            _0x8e4a('⬇️ 开始下载图片');
         }
 
-        // 清空结果
-        function clearResults() {
-            document.getElementById('results').innerHTML = '';
-            document.getElementById('emptyState').classList.add('active');
-            document.getElementById('pagination').style.display = 'none';
-            document.getElementById('keyword').value = '';
-            document.getElementById('page').value = '1';
+        function _0xea04(id) { // sharePhoto
+            const url = `https://tuchong.com/${id}`;
+            if (navigator.share) {
+                navigator.share({ url: url });
+            } else {
+                navigator.clipboard.writeText(url);
+                _0x8e4a('📋 链接已复制到剪贴板');
+            }
         }
 
-        // 显示通知
-        function showNotification(text, type = 'success') {
-            const notification = document.getElementById('notification');
-            const notificationText = document.getElementById('notificationText');
-            
-            notification.className = `notification ${type} active`;
-            notificationText.textContent = text;
-
-            setTimeout(() => {
-                notification.classList.remove('active');
-            }, 3000);
+        function _0x1c26(name) { // toggleFollow
+            if (_0x4d8a.following.has(name)) {
+                _0x4d8a.following.delete(name);
+                _0x8e4a(`已取消关注 ${name}`);
+            } else {
+                _0x4d8a.following.add(name);
+                _0x8e4a(`✓ 已关注 ${name}`);
+            }
+            localStorage.setItem('_0xf0l', JSON.stringify([..._0x4d8a.following]));
+            _0x6b2c();
         }
 
-        // 初始化
-        document.getElementById('emptyState').classList.add('active');
+        function _0xfb15(id) { // likePhoto
+            const el = document.getElementById(`fav-${id}`);
+            if (el) {
+                el.textContent = parseInt(el.textContent) + 1;
+                _0x8e4a('👍 已点赞');
+            }
+        }
+
+        function _0x2d37(id) { // toggleDetails
+            const d = document.getElementById(`details-${id}`);
+            d.classList.toggle('expanded');
+        }
+
+        function _0x8e4a(msg) { // showToast
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function _0x9d7a() { // updateStats
+            document.getElementById('totalPhotos').textContent = _0x4d8a.photos.length;
+            document.getElementById('totalFavorites').textContent = 
+                _0x4d8a.photos.reduce((s, p) => s + (p.favorites || 0), 0);
+            document.getElementById('totalAuthors').textContent = 
+                new Set(_0x4d8a.photos.map(p => p.site?.name).filter(Boolean)).size;
+            document.getElementById('myFavorites').textContent = _0x4d8a.favorites.size;
+        }
+
+        // 加载更多
+        document.getElementById('loadMore').addEventListener('click', () => {
+            const btn = document.getElementById('loadMore');
+            btn.disabled = true;
+            btn.textContent = '加载中...';
+            _0x1f9e().then(() => {
+                btn.disabled = false;
+                btn.textContent = '加载更多作品';
+            });
+        });
+
+        // 搜索框回车
+        document.getElementById('searchInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') _0x3a4f[0]();
+        });
+
+        // 初始加载
+        _0x1f9e();
+
+        // 额外保护 - 定时检查
+        setInterval(() => {
+            if (!document.body.innerHTML.includes('图虫')) {
+                location.reload();
+            }
+        }, 5000);
     </script>
 </body>
 </html>
