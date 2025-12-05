@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机文案生成器</title>
+    <title>视频桌面壁纸</title>
     <style>
         * {
             margin: 0;
@@ -13,29 +13,23 @@
 
         body {
             font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
+            overflow-x: hidden;
         }
 
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 800px;
-            width: 100%;
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.5s ease-in;
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
         }
 
-        @keyframes fadeIn {
+        @keyframes fadeInDown {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(-30px);
             }
             to {
                 opacity: 1;
@@ -43,150 +37,258 @@
             }
         }
 
-        h1 {
-            text-align: center;
-            color: #667eea;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .type-selector {
-            margin-bottom: 30px;
-        }
-
-        .type-selector label {
-            display: block;
+        .header h1 {
+            font-size: 3em;
             margin-bottom: 10px;
-            color: #333;
-            font-weight: bold;
-            font-size: 1.1em;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #fff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .type-grid {
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .category-container {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .category-title {
+            color: white;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .category-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
+            gap: 15px;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        .type-btn {
-            padding: 12px 20px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95em;
-            font-weight: bold;
-        }
-
-        .type-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .type-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .content-box {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        .category-btn {
+            padding: 18px 25px;
+            border: none;
             border-radius: 15px;
-            padding: 30px;
-            min-height: 200px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        .content-box::before {
-            content: '"';
+        .category-btn::before {
+            content: '';
             position: absolute;
-            top: 10px;
-            left: 20px;
-            font-size: 60px;
-            color: rgba(102, 126, 234, 0.2);
-            font-family: Georgia, serif;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
-        .content-text {
-            font-size: 1.3em;
-            line-height: 1.8;
-            color: #333;
-            text-align: center;
+        .category-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #fff;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+            transform: scale(1.05);
+        }
+
+        .category-btn span {
             position: relative;
             z-index: 1;
-            animation: slideIn 0.5s ease-out;
         }
 
-        @keyframes slideIn {
+        .video-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            animation: scaleIn 0.6s ease;
+        }
+
+        @keyframes scaleIn {
             from {
                 opacity: 0;
-                transform: translateX(-20px);
+                transform: scale(0.9);
             }
             to {
                 opacity: 1;
-                transform: translateX(0);
+                transform: scale(1);
             }
         }
 
-        .placeholder {
-            color: #999;
-            font-style: italic;
+        .video-wrapper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
         }
 
-        .btn-container {
+        .video-wrapper video {
+            width: 100%;
+            height: auto;
+            max-height: 600px;
+            display: block;
+            object-fit: contain;
+        }
+
+        .video-poster {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .placeholder {
+            width: 100%;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.5em;
+        }
+
+        .placeholder-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .video-info {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .video-info h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .controls {
             display: flex;
             gap: 15px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .action-btn {
-            padding: 15px 40px;
+        .control-btn {
+            padding: 15px 35px;
             border: none;
             border-radius: 50px;
             font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
         }
 
-        .generate-btn {
+        .control-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .control-btn:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .control-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .load-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
-        .generate-btn:hover {
+        .load-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
 
-        .generate-btn:active {
-            transform: translateY(-1px);
-        }
-
-        .copy-btn {
+        .download-btn {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
         }
 
-        .copy-btn:hover {
+        .download-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
         }
 
-        .copy-btn:disabled {
+        .download-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4);
         }
 
         .loading {
@@ -196,7 +298,9 @@
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: white;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
         }
 
         @keyframes spin {
@@ -205,169 +309,263 @@
 
         .toast {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4caf50;
+            top: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.9);
             color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            animation: slideInRight 0.3s ease-out;
+            padding: 18px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            animation: slideInRight 0.4s ease-out;
             z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-            }
-            to {
-                transform: translateX(0);
-            }
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        .error {
-            background: #f44336;
+        .toast.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         }
 
-        @media (max-width: 600px) {
-            .container {
+        .toast.error {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            .category-btn {
+                padding: 15px 20px;
+                font-size: 1em;
+            }
+
+            .video-container {
                 padding: 20px;
             }
 
-            h1 {
-                font-size: 1.8em;
-            }
-
-            .type-grid {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            }
-
-            .content-text {
-                font-size: 1.1em;
-            }
-
-            .btn-container {
+            .controls {
                 flex-direction: column;
             }
 
-            .action-btn {
+            .control-btn {
                 width: 100%;
+            }
+
+            .video-wrapper video,
+            .placeholder {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>✨ 随机文案生成器</h1>
-        
-        <div class="type-selector">
-            <label>选择文案类型：</label>
-            <div class="type-grid">
-                <button class="type-btn active" data-type="MeiJuZhaiChao">美句摘抄</button>
-                <button class="type-btn" data-type="LoveWords">情话</button>
-                <button class="type-btn" data-type="Sentences">励志句子</button>
-                <button class="type-btn" data-type="Morning">早安</button>
-                <button class="type-btn" data-type="GoodNight">晚安</button>
-                <button class="type-btn" data-type="TongJinCheng">痛金诚</button>
-                <button class="type-btn" data-type="TianGou">舔狗日记</button>
-                <button class="type-btn" data-type="KFCV50">KFC疯狂星期四</button>
+    <div class="header">
+        <h1>🎬 视频桌面壁纸</h1>
+        <p>精选高清动态壁纸，让您的桌面动起来</p>
+    </div>
+
+    <div class="category-container">
+        <div class="category-title">📂 选择分类</div>
+        <div class="category-grid">
+            <button class="category-btn active" data-msg="1">
+                <span>🔥 最热</span>
+            </button>
+            <button class="category-btn" data-msg="2">
+                <span>✨ 最新</span>
+            </button>
+            <button class="category-btn" data-msg="3">
+                <span>📝 文字</span>
+            </button>
+            <button class="category-btn" data-msg="4">
+                <span>⭐ 明星</span>
+            </button>
+            <button class="category-btn" data-msg="5">
+                <span>💕 爱情</span>
+            </button>
+            <button class="category-btn" data-msg="6">
+                <span>🎨 二次元</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="video-container">
+        <div class="video-wrapper" id="videoWrapper">
+            <div class="placeholder">
+                <div class="placeholder-icon">🎥</div>
+                <div>点击"加载壁纸"开始探索</div>
             </div>
         </div>
 
-        <div class="content-box">
-            <p class="content-text placeholder">点击下方按钮获取随机文案...</p>
+        <div class="video-info" id="videoInfo" style="display: none;">
+            <h3 id="videoName">视频名称</h3>
         </div>
 
-        <div class="btn-container">
-            <button class="action-btn generate-btn" id="generateBtn">
-                <span>🎲 生成文案</span>
+        <div class="controls">
+            <button class="control-btn load-btn" id="loadBtn">
+                <span>🎬 加载壁纸</span>
             </button>
-            <button class="action-btn copy-btn" id="copyBtn" disabled>
-                📋 复制文案
+            <button class="control-btn refresh-btn" id="refreshBtn" style="display: none;">
+                <span>🔄 换一个</span>
+            </button>
+            <button class="control-btn download-btn" id="downloadBtn" disabled>
+                <span>⬇️ 下载壁纸</span>
             </button>
         </div>
     </div>
 
     <script>
-        let currentType = 'MeiJuZhaiChao';
-        let currentContent = '';
+        let currentMsg = '1';
+        let currentVideoUrl = '';
+        let currentImageUrl = '';
+        let currentName = '';
 
-        // 类型选择按钮
-        document.querySelectorAll('.type-btn').forEach(btn => {
+        // 分类切换
+        document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                currentType = btn.dataset.type;
+                currentMsg = btn.dataset.msg;
+                
+                // 切换分类后重置
+                document.getElementById('videoWrapper').innerHTML = `
+                    <div class="placeholder">
+                        <div class="placeholder-icon">🎥</div>
+                        <div>点击"加载壁纸"开始探索</div>
+                    </div>
+                `;
+                document.getElementById('videoInfo').style.display = 'none';
+                document.getElementById('downloadBtn').disabled = true;
+                document.getElementById('refreshBtn').style.display = 'none';
+                document.getElementById('loadBtn').style.display = 'inline-block';
             });
         });
 
-        // 生成文案
-        document.getElementById('generateBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('generateBtn');
-            const contentBox = document.querySelector('.content-text');
+        // 加载视频
+        async function loadVideo() {
+            const loadBtn = document.getElementById('loadBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const activeBtn = loadBtn.style.display !== 'none' ? loadBtn : refreshBtn;
             
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span>';
+            activeBtn.disabled = true;
+            activeBtn.innerHTML = '<span><span class="loading"></span>加载中...</span>';
             
             try {
-                const response = await fetch(`https://api.ahfi.cn/api/randomText?type=${currentType}&format=json`);
+                const response = await fetch(`https://api.ahfi.cn/api/spzm?msg=${currentMsg}`);
                 const data = await response.json();
                 
                 if (data.code === 200) {
-                    currentContent = data.data.content;
-                    contentBox.textContent = currentContent;
-                    contentBox.classList.remove('placeholder');
-                    document.getElementById('copyBtn').disabled = false;
-                    showToast('文案获取成功！', 'success');
+                    currentVideoUrl = data.url;
+                    currentImageUrl = data.img;
+                    currentName = data.name || '精选视频壁纸';
+                    
+                    // 显示视频
+                    const videoWrapper = document.getElementById('videoWrapper');
+                    videoWrapper.innerHTML = `
+                        <video controls autoplay loop poster="${currentImageUrl}">
+                            <source src="${currentVideoUrl}" type="video/mp4">
+                            您的浏览器不支持视频播放
+                        </video>
+                    `;
+                    
+                    // 显示信息
+                    document.getElementById('videoName').textContent = currentName;
+                    document.getElementById('videoInfo').style.display = 'block';
+                    document.getElementById('downloadBtn').disabled = false;
+                    
+                    // 切换按钮
+                    loadBtn.style.display = 'none';
+                    refreshBtn.style.display = 'inline-block';
+                    
+                    showToast('壁纸加载成功！', 'success');
                 } else {
-                    showToast('获取失败：' + data.msg, 'error');
+                    showToast('加载失败，请重试', 'error');
                 }
             } catch (error) {
-                showToast('网络错误，请稍后重试', 'error');
+                showToast('网络错误，请检查连接', 'error');
                 console.error(error);
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>🎲 生成文案</span>';
+                activeBtn.disabled = false;
+                loadBtn.innerHTML = '<span>🎬 加载壁纸</span>';
+                refreshBtn.innerHTML = '<span>🔄 换一个</span>';
             }
-        });
+        }
 
-        // 复制文案
-        document.getElementById('copyBtn').addEventListener('click', () => {
-            if (currentContent) {
-                navigator.clipboard.writeText(currentContent).then(() => {
-                    showToast('文案已复制到剪贴板！', 'success');
-                }).catch(() => {
-                    // 备用复制方法
-                    const textarea = document.createElement('textarea');
-                    textarea.value = currentContent;
-                    document.body.appendChild(textarea);
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    showToast('文案已复制到剪贴板！', 'success');
-                });
+        document.getElementById('loadBtn').addEventListener('click', loadVideo);
+        document.getElementById('refreshBtn').addEventListener('click', loadVideo);
+
+        // 下载视频
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            if (!currentVideoUrl) return;
+            
+            try {
+                showToast('正在准备下载...', 'success');
+                
+                // 创建下载链接
+                const a = document.createElement('a');
+                a.href = currentVideoUrl;
+                a.download = `wallpaper_${Date.now()}.mp4`;
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                showToast('下载已开始！', 'success');
+            } catch (error) {
+                showToast('下载失败，请手动保存', 'error');
+                console.error(error);
             }
         });
 
         // 提示框
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            toast.className = `toast ${type}`;
             toast.textContent = message;
             document.body.appendChild(toast);
             
             setTimeout(() => {
-                toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+                toast.style.animation = 'slideInRight 0.4s ease-out reverse';
                 setTimeout(() => {
                     document.body.removeChild(toast);
-                }, 300);
-            }, 2000);
+                }, 400);
+            }, 2500);
         }
 
         // 键盘快捷键
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                document.getElementById('generateBtn').click();
+            if (e.key === 'Enter') {
+                const loadBtn = document.getElementById('loadBtn');
+                const refreshBtn = document.getElementById('refreshBtn');
+                if (loadBtn.style.display !== 'none') {
+                    loadBtn.click();
+                } else {
+                    refreshBtn.click();
+                }
             }
         });
     </script>
