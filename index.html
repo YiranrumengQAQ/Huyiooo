@@ -3,229 +3,598 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机头像生成器</title>
+    <title>图片搜索 - 百度图片搜索API</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
-        
+
         .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 头部样式 */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+        }
+
+        /* 搜索卡片 */
+        .search-card {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             padding: 40px;
-            max-width: 500px;
-            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out;
         }
-        
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 28px;
+
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 15px;
+            align-items: end;
         }
-        
-        .controls {
-            margin-bottom: 30px;
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
         }
-        
-        .control-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
+
+        .form-group label {
+            color: #4a5568;
+            font-weight: 600;
             margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
+            font-size: 0.9rem;
         }
-        
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            background: white;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-        
-        select:focus {
+
+        .form-group input {
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
             outline: none;
-            border-color: #667eea;
         }
-        
-        button {
-            width: 100%;
-            padding: 14px;
+
+        .form-group input:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            padding: 12px 30px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
-        
-        button:hover {
+
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
-        
-        button:active {
+
+        .btn:active {
             transform: translateY(0);
         }
-        
-        .avatar-display {
-            text-align: center;
-            margin-top: 30px;
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            box-shadow: none;
         }
-        
-        #avatarImg {
-            max-width: 100%;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            display: none;
+
+        .btn-secondary:hover {
+            background: #f7fafc;
         }
-        
+
+        /* 加载动画 */
         .loading {
             display: none;
             text-align: center;
-            color: #667eea;
-            font-size: 16px;
-            margin-top: 20px;
+            padding: 40px;
         }
-        
-        .error {
+
+        .loading.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        /* 结果网格 */
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .image-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+            background: #f7fafc;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover .image-wrapper img {
+            transform: scale(1.1);
+        }
+
+        .image-info {
+            padding: 20px;
+        }
+
+        .image-title {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .image-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+
+        /* 空状态 */
+        .empty-state {
             display: none;
-            background: #fee;
-            color: #c33;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 20px;
             text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 20px;
+            animation: fadeIn 0.5s ease;
         }
-        
-        .info {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #666;
+
+        .empty-state.active {
+            display: block;
         }
-        
-        .info a {
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #718096;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+            padding: 20px;
+        }
+
+        .page-btn {
+            padding: 10px 20px;
+            background: white;
             color: #667eea;
-            text-decoration: none;
-            word-break: break-all;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .page-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .search-card {
+                padding: 25px;
+            }
+
+            .results {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .image-wrapper {
+                height: 180px;
+            }
+        }
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 延迟动画 */
+        .image-card:nth-child(1) { animation-delay: 0.1s; }
+        .image-card:nth-child(2) { animation-delay: 0.2s; }
+        .image-card:nth-child(3) { animation-delay: 0.3s; }
+        .image-card:nth-child(4) { animation-delay: 0.4s; }
+        .image-card:nth-child(5) { animation-delay: 0.5s; }
+        .image-card:nth-child(n+6) { animation-delay: 0.6s; }
+
+        /* 通知 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            animation: slideInRight 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.active {
+            display: block;
+        }
+
+        .notification.error {
+            border-left: 4px solid #f56565;
+        }
+
+        .notification.success {
+            border-left: 4px solid #48bb78;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎨 随机头像生成器</h1>
-        
-        <div class="controls">
-            <div class="control-group">
-                <label for="sortSelect">选择头像分类：</label>
-                <select id="sortSelect">
-                    <option value="">随机输出</option>
-                    <option value="男">男</option>
-                    <option value="女">女</option>
-                    <option value="动漫男">动漫男</option>
-                    <option value="动漫女">动漫女</option>
-                </select>
-            </div>
-            
-            <button id="generateBtn">生成随机头像</button>
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🔍 图片搜索</h1>
+            <p>基于百度图片搜索API,快速找到您需要的图片</p>
         </div>
-        
-        <div class="loading" id="loading">加载中...</div>
-        <div class="error" id="error"></div>
-        
-        <div class="avatar-display">
-            <img id="avatarImg" alt="随机头像">
+
+        <!-- 搜索表单 -->
+        <div class="search-card">
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label for="keyword">搜索关键词</label>
+                    <input type="text" id="keyword" placeholder="请输入搜索关键词" required>
+                </div>
+                <div class="form-group">
+                    <label for="page">页码</label>
+                    <input type="number" id="page" value="1" min="1" max="100">
+                </div>
+                <button type="submit" class="btn">搜索</button>
+                <button type="button" class="btn btn-secondary" onclick="clearResults()">清空</button>
+            </form>
         </div>
-        
-        <div class="info" id="info" style="display: none;">
-            <strong>图片地址：</strong><br>
-            <a id="imgLink" href="" target="_blank"></a>
+
+        <!-- 加载状态 -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: white; font-size: 1.1rem;">正在搜索中...</p>
         </div>
+
+        <!-- 空状态 -->
+        <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <h3>还没有搜索结果</h3>
+            <p>请在上方输入关键词开始搜索</p>
+        </div>
+
+        <!-- 结果展示 -->
+        <div class="results" id="results"></div>
+
+        <!-- 分页 -->
+        <div class="pagination" id="pagination" style="display: none;"></div>
+    </div>
+
+    <!-- 通知 -->
+    <div class="notification" id="notification">
+        <div id="notificationText"></div>
     </div>
 
     <script>
-        const API_URL = 'https://api.uomg.com/api/rand.avatar';
-        const generateBtn = document.getElementById('generateBtn');
-        const sortSelect = document.getElementById('sortSelect');
-        const avatarImg = document.getElementById('avatarImg');
-        const loading = document.getElementById('loading');
-        const error = document.getElementById('error');
-        const info = document.getElementById('info');
-        const imgLink = document.getElementById('imgLink');
+        const API_URL = 'https://zj.v.api.aa1.cn/api/so-baidu-img/';
+        let currentKeyword = '';
+        let currentPage = 1;
 
-        // 生成头像
-        async function generateAvatar() {
-            // 隐藏之前的内容
-            avatarImg.style.display = 'none';
-            error.style.display = 'none';
-            info.style.display = 'none';
-            loading.style.display = 'block';
+        // 表单提交
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const keyword = document.getElementById('keyword').value.trim();
+            const page = parseInt(document.getElementById('page').value);
+            
+            if (!keyword) {
+                showNotification('请输入搜索关键词', 'error');
+                return;
+            }
+
+            currentKeyword = keyword;
+            currentPage = page;
+            searchImages(keyword, page);
+        });
+
+        // 搜索图片
+        async function searchImages(keyword, page) {
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const emptyState = document.getElementById('emptyState');
+            const pagination = document.getElementById('pagination');
+
+            // 显示加载状态
+            loading.classList.add('active');
+            results.innerHTML = '';
+            emptyState.classList.remove('active');
+            pagination.style.display = 'none';
 
             try {
-                // 构建API请求URL
-                const sort = sortSelect.value;
-                const params = new URLSearchParams({
-                    format: 'json'
-                });
-                
-                if (sort) {
-                    params.append('sort', sort);
-                }
-
-                const response = await fetch(`${API_URL}?${params}`);
+                const response = await fetch(`${API_URL}?msg=${encodeURIComponent(keyword)}&page=${page}`);
                 const data = await response.json();
 
-                loading.style.display = 'none';
+                loading.classList.remove('active');
 
-                if (data.code === 1 && data.imgurl) {
-                    // 显示图片
-                    avatarImg.src = data.imgurl;
-                    avatarImg.style.display = 'block';
-                    
-                    // 显示图片链接
-                    imgLink.href = data.imgurl;
-                    imgLink.textContent = data.imgurl;
-                    info.style.display = 'block';
+                if (data.code === '200' && data.data && data.data.length > 0) {
+                    displayResults(data.data);
+                    showPagination(page);
+                    showNotification(`找到 ${data.data.length} 张图片`, 'success');
                 } else {
-                    throw new Error(data.msg || '获取头像失败');
+                    emptyState.classList.add('active');
+                    showNotification('没有找到相关图片', 'error');
                 }
-            } catch (err) {
-                loading.style.display = 'none';
-                error.textContent = '获取头像失败：' + err.message;
-                error.style.display = 'block';
+            } catch (error) {
+                loading.classList.remove('active');
+                emptyState.classList.add('active');
+                showNotification('搜索失败,请稍后重试', 'error');
+                console.error('Error:', error);
             }
         }
 
-        // 绑定按钮点击事件
-        generateBtn.addEventListener('click', generateAvatar);
+        // 显示结果
+        function displayResults(images) {
+            const results = document.getElementById('results');
+            results.innerHTML = '';
 
-        // 页面加载时自动生成一个头像
-        window.addEventListener('load', generateAvatar);
+            images.forEach((image, index) => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                card.innerHTML = `
+                    <div class="image-wrapper">
+                        <img src="${image.thumbnailUrl || image.hoverUrl}" 
+                             alt="${image.oriTitle || '图片'}"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3E加载失败%3C/text%3E%3C/svg%3E'">
+                    </div>
+                    <div class="image-info">
+                        <div class="image-title">${image.oriTitle || '未知标题'}</div>
+                        <div class="image-meta">
+                            <span>📐 ${image.width} × ${image.height}</span>
+                        </div>
+                        <div class="image-actions">
+                            <button class="btn btn-small" onclick="viewImage('${image.hoverUrl}')">查看原图</button>
+                            <button class="btn btn-small btn-secondary" onclick="downloadImage('${image.hoverUrl}', '${image.oriTitle}')">下载</button>
+                        </div>
+                    </div>
+                `;
+                results.appendChild(card);
+            });
+        }
+
+        // 显示分页
+        function showPagination(currentPage) {
+            const pagination = document.getElementById('pagination');
+            pagination.style.display = 'flex';
+            pagination.innerHTML = '';
+
+            if (currentPage > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'page-btn';
+                prevBtn.textContent = '上一页';
+                prevBtn.onclick = () => {
+                    document.getElementById('page').value = currentPage - 1;
+                    searchImages(currentKeyword, currentPage - 1);
+                };
+                pagination.appendChild(prevBtn);
+            }
+
+            const currentBtn = document.createElement('button');
+            currentBtn.className = 'page-btn active';
+            currentBtn.textContent = currentPage;
+            pagination.appendChild(currentBtn);
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.textContent = '下一页';
+            nextBtn.onclick = () => {
+                document.getElementById('page').value = currentPage + 1;
+                searchImages(currentKeyword, currentPage + 1);
+            };
+            pagination.appendChild(nextBtn);
+        }
+
+        // 查看原图
+        function viewImage(url) {
+            window.open(url, '_blank');
+        }
+
+        // 下载图片
+        function downloadImage(url, title) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = title || 'image.jpg';
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showNotification('正在下载图片...', 'success');
+        }
+
+        // 清空结果
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('emptyState').classList.add('active');
+            document.getElementById('pagination').style.display = 'none';
+            document.getElementById('keyword').value = '';
+            document.getElementById('page').value = '1';
+        }
+
+        // 显示通知
+        function showNotification(text, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notification.className = `notification ${type} active`;
+            notificationText.textContent = text;
+
+            setTimeout(() => {
+                notification.classList.remove('active');
+            }, 3000);
+        }
+
+        // 初始化
+        document.getElementById('emptyState').classList.add('active');
     </script>
 </body>
 </html>
