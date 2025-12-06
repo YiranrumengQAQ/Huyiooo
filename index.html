@@ -3,1222 +3,1069 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'none'">
-    <title>图虫摄影作品展示</title>
+    <title>图虫推荐图片展示 & 接口说明</title>
     <style>
-        /* 防选择复制 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+        }
+
+        :root {
+            --bg-gradient-start: #4e54c8;
+            --bg-gradient-end: #8f94fb;
+            --card-radius: 16px;
+            --shadow-soft: 0 10px 25px rgba(0,0,0,0.12);
+            --shadow-hover: 0 18px 35px rgba(0,0,0,0.18);
+            --accent: #ff9f43;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
             min-height: 100vh;
-            color: #333;
+            background: radial-gradient(circle at top left, #ffd3a5 0%, transparent 55%),
+                        radial-gradient(circle at bottom right, #fd6585 0%, transparent 55%),
+                        linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            padding: 30px 16px;
+            color: #222;
+            overflow-x: hidden;
         }
 
-        /* 水印层 */
-        body::before {
-            content: '版权所有 - 请勿盗用';
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 3rem;
-            color: rgba(66, 165, 245, 0.05);
-            pointer-events: none;
-            z-index: 9998;
-            white-space: nowrap;
-            font-weight: bold;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%);
-            color: white;
-            padding: 2rem 1rem;
-            box-shadow: 0 4px 20px rgba(66, 165, 245, 0.3);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            animation: slideDown 0.6s ease-out;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .header-content {
-            max-width: 1400px;
+        .app-shell {
+            max-width: 1280px;
             margin: 0 auto;
+            backdrop-filter: blur(16px);
+            background: rgba(255,255,255,0.12);
+            border-radius: 24px;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255,255,255,0.18);
+            overflow: hidden;
+            position: relative;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            text-align: center;
+        .app-shell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(255,255,255,0.26), transparent 55%);
+            opacity: 0.65;
+            pointer-events: none;
         }
 
-        .controls {
+        header {
+            position: relative;
+            padding: 22px 26px 14px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.28);
+            background: linear-gradient(120deg, rgba(15,23,42,0.88), rgba(88,28,135,0.92));
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            z-index: 1;
+        }
+
+        .logo-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 18px;
+            background: conic-gradient(from 180deg, #ff9f43, #ff6b6b, #48dbfb, #1dd1a1, #ff9f43);
+            display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 1.5rem;
-        }
-
-        .search-box {
+            box-shadow: 0 12px 30px rgba(0,0,0,0.35);
             position: relative;
-            flex: 1;
-            min-width: 250px;
-            max-width: 400px;
+            overflow: hidden;
         }
 
-        .search-box input {
-            width: 100%;
-            padding: 0.8rem 3rem 0.8rem 1rem;
-            border: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-
-        .search-btn {
+        .logo-mark::after {
+            content: '';
             position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #42a5f5;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            inset: 3px;
+            border-radius: 15px;
+            background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.9) 0, transparent 42%),
+                        radial-gradient(circle at 80% 85%, rgba(0,0,0,0.28) 0, transparent 55%),
+                        linear-gradient(145deg, #1f2933, #111827);
         }
 
-        .search-btn:hover {
-            background: #1976d2;
+        .logo-mark span {
+            position: relative;
+            font-weight: 800;
+            font-size: 20px;
+            color: #fff;
+            text-shadow: 0 3px 8px rgba(0,0,0,0.55);
         }
 
-        .view-toggle {
+        .logo-text h1 {
+            font-size: 20px;
+            margin-bottom: 4px;
+            letter-spacing: 0.04em;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .header-right {
             display: flex;
-            background: white;
-            border-radius: 25px;
+            align-items: center;
+            gap: 10px;
+            z-index: 1;
+        }
+
+        .pill {
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.7);
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(248,250,252,0.22);
+        }
+
+        .pill-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 6px rgba(34,197,94,0.35);
+            animation: pulse 1.4s infinite;
+        }
+
+        .tab-switcher {
+            display: inline-flex;
+            padding: 3px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.8);
+            border: 1px solid rgba(248,250,252,0.26);
+        }
+
+        .tab-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 12px;
+            cursor: pointer;
+            background: transparent;
+            color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #f97316, #facc15);
+            color: #111827;
+            box-shadow: 0 8px 18px rgba(248, 159, 31, 0.6);
+        }
+
+        main {
+            position: relative;
+            padding: 18px 20px 22px;
+            backdrop-filter: blur(10px);
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.45) 0, transparent 55%),
+                        radial-gradient(circle at bottom right, rgba(15,23,42,0.9) 0, rgba(15,23,42,0.98) 60%);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 2.1fr 1.3fr;
+            gap: 18px;
+        }
+
+        .panel {
+            position: relative;
+            background: linear-gradient(145deg, rgba(15,23,42,0.96), rgba(30,64,175,0.96));
+            border-radius: 22px;
+            padding: 16px 16px 18px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(148,163,184,0.55);
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            color: #e5e7eb;
         }
 
-        .view-btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            background: white;
-            color: #666;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
+        .panel::before {
+            content: '';
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(circle at 0 0, rgba(96,165,250,0.26) 0, transparent 50%),
+                        radial-gradient(circle at 100% 100%, rgba(59,130,246,0.18) 0, transparent 50%);
+            opacity: 0.5;
+            pointer-events: none;
         }
 
-        .view-btn.active {
-            background: #42a5f5;
-            color: white;
+        .panel-header {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-        .sort-select {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 25px;
-            background: white;
-            color: #666;
-            font-size: 1rem;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .filter-btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 25px;
-            background: white;
-            color: #42a5f5;
-            font-size: 1rem;
+        .panel-title {
+            font-size: 15px;
             font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .stats-bar {
-            background: white;
-            padding: 1rem;
-            margin: 1rem auto;
-            max-width: 1400px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 1rem;
+            align-items: center;
+            gap: 8px;
         }
 
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #42a5f5;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        .filter-panel {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.4s ease;
-        }
-
-        .filter-panel.active {
-            max-height: 500px;
-        }
-
-        .filter-tags {
+        .panel-title span.icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 20%, #fef9c3 0, #f97316 50%, #7c2d12 100%);
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-            margin-top: 1rem;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(248, 152, 40, 0.7);
+            font-size: 13px;
         }
 
-        .filter-tag {
-            padding: 0.6rem 1.2rem;
-            border: 2px solid #e3f2fd;
-            border-radius: 20px;
-            background: white;
-            color: #666;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
+        .panel-subtitle {
+            font-size: 11px;
+            color: #9ca3af;
         }
 
-        .filter-tag:hover, .filter-tag.active {
-            background: #42a5f5;
-            color: white;
-            border-color: #42a5f5;
-            transform: translateY(-2px);
+        .badge {
+            font-size: 10px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(15,118,110,0.22);
+            border: 1px solid rgba(45,212,191,0.65);
+            color: #a5f3fc;
         }
 
         .gallery {
+            position: relative;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 4px;
+            max-height: 530px;
+            overflow-y: auto;
+            padding-right: 4px;
         }
 
-        .gallery.list-view {
-            grid-template-columns: 1fr;
+        .gallery::-webkit-scrollbar,
+        .params-scroll::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .gallery.grid-view-large {
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-        }
-
-        @media (max-width: 768px) {
-            .gallery {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            .controls {
-                flex-direction: column;
-            }
-            .search-box {
-                max-width: 100%;
-            }
+        .gallery::-webkit-scrollbar-thumb,
+        .params-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #4ade80, #22c55e);
+            border-radius: 999px;
         }
 
         .card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(66, 165, 245, 0.15);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 0.6s ease-out forwards;
             position: relative;
-        }
-
-        @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            background: radial-gradient(circle at top left, rgba(248,250,252,0.96) 0, rgba(226,232,240,0.98) 50%, rgba(203,213,225,0.98) 100%);
+            box-shadow: 0 16px 40px rgba(15,23,42,0.5);
+            transform-origin: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, translate 0.25s ease;
+            cursor: pointer;
+            animation: card-in 0.55s ease both;
         }
 
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 40px rgba(66, 165, 245, 0.25);
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: var(--shadow-hover);
         }
 
-        .card.favorited::before {
-            content: '❤️';
+        .card::before {
+            content: '';
             position: absolute;
-            top: 1rem;
-            left: 1rem;
-            font-size: 1.5rem;
-            z-index: 10;
-            animation: heartbeat 1s ease infinite;
-        }
-
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .card-image-container {
-            position: relative;
-            width: 100%;
-            padding-top: 75%;
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .list-view .card {
-            display: flex;
-            flex-direction: row;
-        }
-
-        .list-view .card-image-container {
-            width: 300px;
-            padding-top: 0;
-            height: 250px;
-            flex-shrink: 0;
-        }
-
-        .card-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(248,250,252,0.6), transparent 55%);
             opacity: 0;
-            transition: opacity 0.5s ease, transform 0.4s ease;
+            transition: opacity 0.35s ease;
             pointer-events: none;
         }
 
-        .card-image.loaded {
+        .card:hover::before {
             opacity: 1;
         }
 
-        .card:hover .card-image {
-            transform: scale(1.05);
+        .card-image-wrap {
+            position: relative;
+            overflow: hidden;
         }
 
-        .image-skeleton {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .card-image {
             width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #e3f2fd 25%, #bbdefb 50%, #e3f2fd 75%);
-            background-size: 200% 100%;
-            animation: skeleton 1.5s ease-in-out infinite;
+            height: 190px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s ease;
+            background: #020617;
         }
 
-        @keyframes skeleton {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        .card:hover .card-image {
+            transform: scale(1.07) rotate(-0.4deg);
         }
 
         .image-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15,23,42,0.85), transparent 55%);
             display: flex;
+            justify-content: space-between;
             align-items: flex-end;
-            padding: 1rem;
-            color: white;
-        }
-
-        .card-image-container:hover .image-overlay {
-            opacity: 1;
-        }
-
-        .action-buttons {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            display: flex;
-            gap: 0.5rem;
+            padding: 10px 12px;
+            color: #f9fafb;
+            font-size: 11px;
             opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            z-index: 5;
+            transform: translateY(10px);
+            transition: all 0.25s ease;
         }
 
-        .card-image.loaded ~ .action-buttons {
+        .card:hover .image-overlay {
             opacity: 1;
             transform: translateY(0);
         }
 
-        .action-btn {
-            background: rgba(255, 255, 255, 0.95);
-            color: #42a5f5;
-            border: none;
-            padding: 0.6rem;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transition: all 0.3s ease;
-            display: flex;
+        .overlay-pill {
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.8);
+            border: 1px solid rgba(156,163,175,0.8);
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .action-btn:hover {
-            background: #42a5f5;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .action-btn.favorited {
-            background: #f44336;
-            color: white;
+            gap: 4px;
         }
 
         .card-content {
-            padding: 1.5rem;
-            flex: 1;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 0.8rem;
-        }
-
-        .date {
-            font-size: 0.85rem;
-            color: #999;
+            padding: 11px 12px 12px;
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 13px;
             font-weight: 600;
-            color: #1976d2;
-            margin-bottom: 0.8rem;
-            line-height: 1.4;
-            cursor: pointer;
-            transition: color 0.3s ease;
+            color: #111827;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        .card-title:hover {
-            color: #42a5f5;
-        }
-
-        .card-stats {
+        .card-meta {
             display: flex;
-            gap: 1.5rem;
-            margin-bottom: 1rem;
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .stat {
-            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.3rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 0.3rem 0.6rem;
-            border-radius: 12px;
+            margin-bottom: 6px;
         }
 
-        .stat:hover {
-            background: #e3f2fd;
-            color: #42a5f5;
-            transform: scale(1.05);
+        .stat-group {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            color: #6b7280;
         }
 
-        .tags {
+        .stat-chip {
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: rgba(249,250,251,0.8);
+            border: 1px solid rgba(209,213,219,0.9);
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .tag-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            gap: 4px;
+            margin-bottom: 7px;
         }
 
         .tag {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            color: #1976d2;
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tag:hover {
-            background: #42a5f5;
-            color: white;
-            transform: translateY(-2px);
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(37,99,235,0.06);
+            color: #1d4ed8;
+            border: 1px solid rgba(96,165,250,0.4);
         }
 
         .author {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e3f2fd;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            padding: 0.8rem;
-            margin: 0 -0.5rem;
-        }
-
-        .author:hover {
-            background: #f5f5f5;
+            gap: 8px;
+            padding-top: 7px;
+            border-top: 1px dashed rgba(209,213,219,0.9);
         }
 
         .author-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
             object-fit: cover;
-            border: 2px solid #42a5f5;
-            transition: all 0.3s ease;
-            pointer-events: none;
+            border: 1px solid rgba(148,163,184,0.9);
+            box-shadow: 0 0 0 2px rgba(226,232,240,0.9);
         }
 
         .author-info {
             flex: 1;
+            min-width: 0;
         }
 
         .author-name {
+            font-size: 11px;
+            color: #111827;
             font-weight: 600;
-            color: #1976d2;
-            margin-bottom: 0.2rem;
-        }
-
-        .author-followers {
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .author-follow-btn {
-            padding: 0.5rem 1rem;
-            border: 2px solid #42a5f5;
-            background: white;
-            color: #42a5f5;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .author-follow-btn:hover, .author-follow-btn.following {
-            background: #42a5f5;
-            color: white;
-        }
-
-        .expand-btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: #f5f5f5;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            margin-top: 0.5rem;
-            border-radius: 8px;
-        }
-
-        .card-details {
-            max-height: 0;
+            white-space: nowrap;
             overflow: hidden;
-            transition: max-height 0.3s ease;
-            padding: 0 1rem;
+            text-overflow: ellipsis;
         }
 
-        .card-details.expanded {
-            max-height: 300px;
-            padding: 1rem;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .load-more {
-            display: block;
-            margin: 3rem auto;
-            padding: 1rem 3rem;
-            background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(66, 165, 245, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            max-width: 90vw;
-            max-height: 90vh;
-            position: relative;
-        }
-
-        .modal-image {
-            max-width: 100%;
-            max-height: 90vh;
-            object-fit: contain;
-            border-radius: 8px;
-            pointer-events: none;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            background: white;
-            color: #333;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        .author-desc {
+            font-size: 10px;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .loading {
             text-align: center;
-            padding: 3rem;
-            font-size: 1.2rem;
-            color: #42a5f5;
+            color: #e5e7eb;
+            font-size: 13px;
+            padding: 14px 0 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .spinner {
-            border: 4px solid #e3f2fd;
-            border-top: 4px solid #42a5f5;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            border: 2px solid rgba(148,163,184,0.8);
+            border-top-color: #38bdf8;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .load-more-wrap {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-top: 6px;
+        }
+
+        .load-more {
+            border: none;
+            border-radius: 999px;
+            padding: 7px 16px;
+            background: linear-gradient(135deg, #22c55e, #4ade80);
+            color: #022c22;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 12px 25px rgba(34,197,94,0.55);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        }
+
+        .load-more:hover {
+            transform: translateY(-1px) scale(1.01);
+            box-shadow: 0 16px 35px rgba(34,197,94,0.7);
+            filter: brightness(1.04);
+        }
+
+        .load-more:active {
+            transform: translateY(1px) scale(0.99);
+            box-shadow: 0 8px 18px rgba(34,197,94,0.55);
+        }
+
+        .load-more:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .error {
+            margin-top: 8px;
+            padding: 7px 10px;
+            border-radius: 12px;
+            background: rgba(248,113,113,0.08);
+            border: 1px solid rgba(248,113,113,0.5);
+            color: #fecaca;
+            font-size: 11px;
+            display: none;
+        }
+
+        /* 右侧：接口说明 */
+        .params-scroll {
+            position: relative;
+            max-height: 530px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #e5e7eb;
+            margin-bottom: 6px;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .chip {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.65);
+            background: rgba(15,23,42,0.9);
+            color: #e5e7eb;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .endpoint-card {
+            border-radius: 16px;
+            padding: 10px 11px;
+            background: radial-gradient(circle at top, rgba(30,64,175,0.9) 0, rgba(15,23,42,0.96) 52%);
+            border: 1px solid rgba(129,140,248,0.7);
+            margin-bottom: 10px;
+        }
+
+        .endpoint-url {
+            font-family: SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            font-size: 11px;
+            color: #bfdbfe;
+            background: rgba(15,23,42,0.85);
+            padding: 6px 8px;
+            border-radius: 9px;
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 3px 7px;
+            font-size: 10px;
+            cursor: pointer;
+            background: rgba(59,130,246,0.15);
+            color: #bfdbfe;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .field-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(15,23,42,0.9);
+        }
+
+        .field-table thead {
+            background: linear-gradient(90deg, rgba(30,64,175,0.9), rgba(37,99,235,0.9));
+        }
+
+        .field-table th,
+        .field-table td {
+            padding: 6px 8px;
+            font-size: 11px;
+            text-align: left;
+            border-bottom: 1px solid rgba(30,64,175,0.7);
+        }
+
+        .field-table th {
+            color: #e5e7eb;
+        }
+
+        .field-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .field-name {
+            color: #bfdbfe;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .field-type {
+            color: #a5b4fc;
+            white-space: nowrap;
+        }
+
+        .field-desc {
+            color: #e5e7eb;
+        }
+
+        .warn-box {
+            margin-top: 10px;
+            padding: 7px 9px;
+            border-radius: 12px;
+            background: rgba(248,250,252,0.06);
+            border: 1px dashed rgba(248,250,252,0.42);
+            font-size: 11px;
+            color: #e5e7eb;
+            display: flex;
+            gap: 8px;
+        }
+
+        .warn-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(252,211,77,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #facc15;
+        }
+
+        .badge-error {
+            background: rgba(239,68,68,0.18);
+            border-color: rgba(248,113,113,0.9);
+            color: #fecaca;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.35);
+                opacity: 0.4;
+            }
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        .toast {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #333;
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            opacity: 0;
-            transition: all 0.3s ease;
-            z-index: 2000;
+        @keyframes card-in {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
+        @media (max-width: 960px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+            main {
+                padding: 14px;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
         }
 
-        .no-results {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #666;
-        }
-
-        .no-results-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        /* 防调试样式 */
-        .dev-warning {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #f44336;
-            color: white;
-            z-index: 99999;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            font-weight: bold;
+        @media (max-width: 640px) {
+            body {
+                padding: 16px 10px;
+            }
+            .app-shell {
+                border-radius: 18px;
+            }
+            .gallery {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="dev-warning" id="devWarning">
-        🚫 检测到非法访问！
-    </div>
-
-    <div class="header">
-        <div class="header-content">
-            <h1>📷 图虫摄影作品展示</h1>
-            <div class="controls">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="搜索标题、作者、标签...">
-                    <button class="search-btn" onclick="_0x3a4f[0]()">🔍</button>
-                </div>
-                <div class="view-toggle">
-                    <button class="view-btn active" data-view="grid" onclick="_0x3a4f[1]('grid')">🔲 网格</button>
-                    <button class="view-btn" data-view="grid-large" onclick="_0x3a4f[1]('grid-large')">🖼️ 大图</button>
-                    <button class="view-btn" data-view="list" onclick="_0x3a4f[1]('list')">📋 列表</button>
-                </div>
-                <select class="sort-select" id="sortSelect" onchange="_0x3a4f[2]()">
-                    <option value="latest">最新发布</option>
-                    <option value="popular">最受欢迎</option>
-                    <option value="comments">评论最多</option>
-                </select>
-                <button class="filter-btn" onclick="_0x3a4f[3]()">🎨 筛选标签</button>
+<div class="app-shell">
+    <header>
+        <div class="logo-area">
+            <div class="logo-mark"><span>TC</span></div>
+            <div class="logo-text">
+                <h1>图虫推荐图 & API 控制台</h1>
+                <p>实时浏览精美图片，同时查看接口字段说明</p>
             </div>
         </div>
-    </div>
-
-    <div class="stats-bar">
-        <div class="stat-item">
-            <div class="stat-value" id="totalPhotos">0</div>
-            <div class="stat-label">作品总数</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="totalFavorites">0</div>
-            <div class="stat-label">总收藏数</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="totalAuthors">0</div>
-            <div class="stat-label">摄影师</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="myFavorites">0</div>
-            <div class="stat-label">我的收藏</div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="filter-panel" id="filterPanel">
-            <h3 style="margin-bottom: 1rem; color: #42a5f5;">🏷️ 按标签筛选</h3>
-            <div class="filter-tags" id="filterTags">
-                <div class="filter-tag" data-tag="all" onclick="_0x3a4f[4]('all')">全部</div>
+        <div class="header-right">
+            <div class="pill">
+                <span class="pill-dot"></span>
+                <span>在线 · 通过官方推荐源</span>
+            </div>
+            <div class="tab-switcher" aria-label="模式切换，仅视觉装饰">
+                <button class="tab-btn active" type="button">图片浏览</button>
+                <button class="tab-btn" type="button">参数说明</button>
             </div>
         </div>
+    </header>
 
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-            <p>正在加载精彩作品...</p>
+    <main>
+        <div class="layout">
+            <!-- 左侧：图片展示 -->
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title"><span class="icon">📸</span>推荐图片流</div>
+                        <div class="panel-subtitle">自动从 https://api.tuchong.com/feed-app 拉取推荐内容</div>
+                    </div>
+                    <span class="badge">GET · JSON</span>
+                </div>
+
+                <div id="loading" class="loading">
+                    <span class="spinner"></span>
+                    <span>正在为你加载最新的图虫推荐图片...</span>
+                </div>
+                <div id="error" class="error"></div>
+                <div id="gallery" class="gallery"></div>
+                <div class="load-more-wrap">
+                    <button id="loadMore" class="load-more" style="display:none;">
+                        <span>加载更多推荐</span>
+                        <span>↓</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 右侧：接口参数说明 -->
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title"><span class="icon">🧩</span>返回参数说明</div>
+                        <div class="panel-subtitle">快速理解图虫推荐接口返回的关键字段</div>
+                    </div>
+                    <span class="badge">文档视图</span>
+                </div>
+
+                <div class="params-scroll">
+                    <div class="section">
+                        <div class="section-title">基础信息</div>
+                        <div class="chip-row">
+                            <span class="chip">请求方式：<strong>GET</strong></span>
+                            <span class="chip">返回格式：<strong>JSON</strong></span>
+                            <span class="chip">接口状态：<span style="color:#4ade80;">公开可用</span></span>
+                        </div>
+                        <div class="endpoint-card">
+                            <div style="font-size:11px;color:#e5e7eb;">接口地址</div>
+                            <div class="endpoint-url">
+                                <span>https://api.tuchong.com/feed-app</span>
+                                <button class="copy-btn" type="button" onclick="copyText('https://api.tuchong.com/feed-app', this)">
+                                    <span>复制</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section" style="margin-top:10px;">
+                        <div class="section-title">分页参数</div>
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:24%;">名称</th>
+                                    <th style="width:20%;">类型</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="field-name">post_id</td>
+                                    <td class="field-type">int</td>
+                                    <td class="field-desc">用于翻页；传入上一页最后一条的 post_id，即可获取后续推荐数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="section" style="margin-top:10px;">
+                        <div class="section-title">图片内容字段</div>
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:24%;">名称</th>
+                                    <th style="width:20%;">类型</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="field-name">url</td>
+                                    <td class="field-type">string</td>
+                                    <td class="field-desc">图片所在网页链接，用于跳转到图虫的详情页</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">published_at</td>
+                                    <td class="field-type">string</td>
+                                    <td class="field-desc">图片（或文章）在图虫上的发表日期</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">favorites</td>
+                                    <td class="field-type">int</td>
+                                    <td class="field-desc">喜欢这张图片的用户数量</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">comments</td>
+                                    <td class="field-type">int</td>
+                                    <td class="field-desc">这张图片下的评论数量</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">image</td>
+                                    <td class="field-type">object</td>
+                                    <td class="field-desc">图片宽高等信息（实际返回中通常为 images 数组）</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">img_id</td>
+                                    <td class="field-type">string</td>
+                                    <td class="field-desc">单张图片的标识，可与 user_id 组合生成图片直链</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">title</td>
+                                    <td class="field-type">string</td>
+                                    <td class="field-desc">图片或作品标题</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">tags</td>
+                                    <td class="field-type">string / array</td>
+                                    <td class="field-desc">标签信息，用于描述图片内容或主题</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="section" style="margin-top:10px;">
+                        <div class="section-title">作者信息字段（site）</div>
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:24%;">名称</th>
+                                    <th style="width:20%;">类型</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="field-name">site</td>
+                                    <td class="field-type">object</td>
+                                    <td class="field-desc">作者信息对象，包含昵称、主页等</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">name</td>
+                                    <td class="field-type">string</td>
+                                    <td class="field-desc">作者昵称</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">description</td>
+                                    <td class="field-type">string</td>
+                                    <td class="field-desc">作者个性签名或简介</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">url</td>
+                                    <td class="field-type">string</td>
+                                    <td class="field-desc">作者主页链接</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">icon</td>
+                                    <td class="field-type">string</td>
+                                    <td class="field-desc">作者头像地址</td>
+                                </tr>
+                                <tr>
+                                    <td class="field-name">followers</td>
+                                    <td class="field-type">int</td>
+                                    <td class="field-desc">粉丝数量</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="section" style="margin-top:10px;">
+                        <div class="section-title">错误码</div>
+                        <table class="field-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:24%;">错误码</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="field-name">405</td>
+                                    <td class="field-desc">你没有操作的权限（例如访问受限资源时）</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="warn-box badge-error" style="margin-top:8px;">
+                            <div class="warn-icon">!</div>
+                            <div>
+                                <div>提示</div>
+                                <div>调用接口时请遵守图虫平台使用条款，不要进行批量爬取或恶意抓取。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
+    </main>
+</div>
 
-        <div id="gallery" class="gallery"></div>
+<script>
+    const API_URL = 'https://api.tuchong.com/feed-app';
+    let lastPostId = null;
+    let isLoading = false;
 
-        <div id="noResults" class="no-results" style="display: none;">
-            <div class="no-results-icon">🔍</div>
-            <h2>未找到相关作品</h2>
-            <p>尝试调整搜索条件或筛选标签</p>
-        </div>
+    const gallery = document.getElementById('gallery');
+    const loadingDiv = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+    const loadMoreBtn = document.getElementById('loadMore');
 
-        <button id="loadMore" class="load-more" style="display:none;">加载更多作品</button>
-    </div>
+    async function fetchImages() {
+        if (isLoading) return;
+        isLoading = true;
+        loadingDiv.style.display = 'flex';
+        loadMoreBtn.disabled = true;
+        errorDiv.style.display = 'none';
 
-    <div class="modal" id="imageModal" onclick="_0x3a4f[5]()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="_0x3a4f[5]()">✕ 关闭</button>
-            <img class="modal-image" id="modalImage" src="" alt="">
-        </div>
-    </div>
-
-    <div class="toast" id="toast"></div>
-
-    <script>
-        // 防调试保护
-        (function() {
-            'use strict';
-            
-            // 检测域名（可选 - 如果你想限制只在特定域名运行）
-            const _0x5f2d = ['localhost', '127.0.0.1', 'your-domain.com'];
-            const _0x1a8c = window.location.hostname;
-            // if (!_0x5f2d.some(d => _0x1a8c.includes(d))) {
-            //     document.body.innerHTML = '<h1 style="text-align:center;margin-top:20%;">⚠️ 未授权访问</h1>';
-            //     return;
-            // }
-
-            // 防iframe嵌套
-            if (window.self !== window.top) {
-                window.top.location = window.self.location;
+        try {
+            const url = lastPostId ? `${API_URL}?post_id=${lastPostId}` : API_URL;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP 状态: ${response.status}`);
             }
+            const data = await response.json();
 
-            // 禁用右键
-            document.addEventListener('contextmenu', e => e.preventDefault());
+            if (data.feedList && data.feedList.length > 0) {
+                displayImages(data.feedList);
+                lastPostId = data.feedList[data.feedList.length - 1].post_id;
+                loadMoreBtn.style.display = 'inline-flex';
+            } else {
+                showError('没有更多图片了');
+            }
+        } catch (e) {
+            showError('加载失败：' + e.message);
+        } finally {
+            isLoading = false;
+            loadingDiv.style.display = 'none';
+            loadMoreBtn.disabled = false;
+        }
+    }
 
-            // 禁用特定快捷键
-            document.addEventListener('keydown', e => {
-                if (e.keyCode === 123 || // F12
-                    (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
-                    (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
-                    (e.ctrlKey && e.keyCode === 85) || // Ctrl+U
-                    (e.ctrlKey && e.keyCode === 83)) { // Ctrl+S
-                    e.preventDefault();
-                    return false;
-                }
-            });
+    function displayImages(feedList) {
+        feedList.forEach((item, index) => {
+            if (!item.images || item.images.length === 0) return;
+            const image = item.images[0];
+            const userId = image.user_id || (item.site && item.site.site_id) || '';
+            const imageUrl = userId && image.img_id
+                ? `https://photo.tuchong.com/${userId}/f/${image.img_id}.jpg`
+                : '';
 
-            // 检测开发者工具
-            let _0x9c7b = false;
-            const _0x4e1a = setInterval(() => {
-                const _0x8d3f = new Date();
-                debugger;
-                const _0x2b6c = new Date() - _0x8d3f;
-                if (_0x2b6c > 100) {
-                    if (!_0x9c7b) {
-                        _0x9c7b = true;
-                        document.getElementById('devWarning').style.display = 'flex';
-                        setTimeout(() => {
-                            window.location.href = 'about:blank';
-                        }, 2000);
-                    }
-                }
-            }, 1000);
-
-            // 控制台警告
-            console.log('%c⚠️ 警告！', 'color: red; font-size: 40px; font-weight: bold;');
-            console.log('%c请勿在此处粘贴任何代码！\n这可能导致您的账户被盗！', 'color: #333; font-size: 16px;');
-
-            // 检测控制台打开
-            const _0x7a2e = () => {
-                const _0x3c9d = window.outerWidth - window.innerWidth > 160;
-                const _0x6f1b = window.outerHeight - window.innerHeight > 160;
-                if (_0x3c9d || _0x6f1b) {
-                    document.getElementById('devWarning').style.display = 'flex';
+            const card = document.createElement('article');
+            card.className = 'card';
+            card.style.animationDelay = (index * 40) + 'ms';
+            card.onclick = () => {
+                if (item.url) {
+                    window.open(item.url, '_blank');
                 }
             };
-            window.addEventListener('resize', _0x7a2e);
 
-        })();
+            const tagHtml = item.tags && item.tags.length
+                ? `<div class="tag-row">${item.tags.slice(0, 3).map(t => `<span class="tag">#${t}</span>`).join('')}</div>`
+                : '';
 
-        // 核心代码混淆
-        const _0x4d8a = {
-            photos: [],
-            displayed: [],
-            postId: null,
-            loading: false,
-            view: 'grid',
-            sort: 'latest',
-            filter: 'all',
-            favorites: new Set(JSON.parse(localStorage.getItem('_0xf4v') || '[]')),
-            following: new Set(JSON.parse(localStorage.getItem('_0xf0l') || '[]')),
-            tags: new Set()
-        };
-
-        // 函数映射表（部分混淆）
-        const _0x3a4f = [
-            function() { /* performSearch */ 
-                const q = document.getElementById('searchInput').value.toLowerCase();
-                _0x4d8a.displayed = !q ? [..._0x4d8a.photos] : _0x4d8a.photos.filter(p => 
-                    (p.title && p.title.toLowerCase().includes(q)) ||
-                    (p.tags && p.tags.toLowerCase().includes(q)) ||
-                    (p.site && p.site.name.toLowerCase().includes(q))
-                );
-                _0x6b2c();
-                _0x8e4a(`🔍 找到 ${_0x4d8a.displayed.length} 个结果`);
-            },
-            function(v) { /* changeView */
-                _0x4d8a.view = v;
-                document.querySelectorAll('.view-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.view === v);
-                });
-                const g = document.getElementById('gallery');
-                g.className = 'gallery';
-                if (v === 'list') g.classList.add('list-view');
-                else if (v === 'grid-large') g.classList.add('grid-view-large');
-            },
-            function() { /* sortPhotos */
-                _0x4d8a.sort = document.getElementById('sortSelect').value;
-                _0x2e7d();
-            },
-            function() { /* toggleFilter */
-                document.getElementById('filterPanel').classList.toggle('active');
-            },
-            function(tag) { /* filterByTag */
-                _0x4d8a.filter = tag;
-                document.querySelectorAll('.filter-tag').forEach(el => {
-                    el.classList.toggle('active', el.dataset.tag === tag);
-                });
-                _0x2e7d();
-            },
-            function() { /* closeModal */
-                document.getElementById('imageModal').classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
-        ];
-
-        // API请求函数（混淆）
-        async function _0x1f9e() {
-            if (_0x4d8a.loading) return;
-            _0x4d8a.loading = true;
-            try {
-                const url = _0x4d8a.postId 
-                    ? `${'https://api.tu'}${'chong.com/feed-app?post_id='}${_0x4d8a.postId}`
-                    : `${'https://api.tu'}${'chong.com/feed-app'}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                if (data.feedList && data.feedList.length > 0) {
-                    _0x4d8a.photos = _0x4d8a.photos.concat(data.feedList);
-                    _0x5c3b(data.feedList);
-                    _0x2e7d();
-                    _0x4d8a.postId = data.feedList[data.feedList.length - 1].post_id;
-                    document.getElementById('loadMore').style.display = 'block';
-                    _0x9d7a();
-                }
-                document.getElementById('loading').style.display = 'none';
-            } catch (e) {
-                _0x8e4a('❌ 加载失败，请稍后重试');
-            } finally {
-                _0x4d8a.loading = false;
-            }
-        }
-
-        // 提取标签
-        function _0x5c3b(photos) {
-            photos.forEach(p => {
-                if (p.tags) {
-                    p.tags.split(',').forEach(t => {
-                        const tr = t.trim();
-                        if (tr) _0x4d8a.tags.add(tr);
-                    });
-                }
-            });
-            _0x7f8c();
-        }
-
-        // 渲染标签
-        function _0x7f8c() {
-            const c = document.getElementById('filterTags');
-            const e = c.querySelectorAll('.filter-tag:not([data-tag="all"])');
-            e.forEach(t => t.remove());
-            Array.from(_0x4d8a.tags).slice(0, 20).forEach(tag => {
-                const el = document.createElement('div');
-                el.className = 'filter-tag';
-                el.dataset.tag = tag;
-                el.textContent = tag;
-                el.onclick = () => _0x3a4f[4](tag);
-                c.appendChild(el);
-            });
-        }
-
-        // 应用筛选和排序
-        function _0x2e7d() {
-            _0x4d8a.displayed = _0x4d8a.photos.filter(p => {
-                if (_0x4d8a.filter === 'all') return true;
-                return p.tags && p.tags.includes(_0x4d8a.filter);
-            });
-            if (_0x4d8a.sort === 'popular') {
-                _0x4d8a.displayed.sort((a, b) => (b.favorites || 0) - (a.favorites || 0));
-            } else if (_0x4d8a.sort === 'comments') {
-                _0x4d8a.displayed.sort((a, b) => (b.comments || 0) - (a.comments || 0));
-            }
-            _0x6b2c();
-        }
-
-        // 渲染画廊
-        function _0x6b2c() {
-            const g = document.getElementById('gallery');
-            g.innerHTML = '';
-            if (_0x4d8a.displayed.length === 0) {
-                document.getElementById('noResults').style.display = 'block';
-                return;
-            }
-            document.getElementById('noResults').style.display = 'none';
-            _0x4d8a.displayed.forEach((p, i) => {
-                if (!p.images || p.images.length === 0) return;
-                const card = _0xa3c7(p, i);
-                g.appendChild(card);
-            });
-        }
-
-        // 创建卡片（核心渲染函数）
-        function _0xa3c7(photo, index) {
-            const card = document.createElement('div');
-            card.className = 'card';
-            if (_0x4d8a.favorites.has(photo.post_id)) card.classList.add('favorited');
-            card.style.animationDelay = `${(index % 10) * 0.1}s`;
-            card.dataset.postId = photo.post_id;
-
-            const img = photo.images[0];
-            const imgUrl = `https://photo.tuchong.com/${img.user_id}/f/${img.img_id}.jpg`;
-            const date = new Date(photo.published_at).toLocaleDateString('zh-CN', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
-            const tags = photo.tags ? photo.tags.split(',').slice(0, 4) : [];
+            const site = item.site || {};
+            const publishedText = item.published_at ? new Date(item.published_at).toLocaleString() : '时间未知';
 
             card.innerHTML = `
-                <div class="card-image-container" onclick="_0xb5d4('${imgUrl}')">
-                    <div class="image-skeleton"></div>
-                    <img class="card-image" data-src="${imgUrl}" alt="${photo.title || '摄影作品'}">
-                    <div class="image-overlay"><span>🔍 点击查看大图</span></div>
-                    <div class="action-buttons">
-                        <button class="action-btn ${_0x4d8a.favorites.has(photo.post_id) ? 'favorited' : ''}" 
-                                onclick="event.stopPropagation(); _0xc8e2(${photo.post_id})">
-                            ${_0x4d8a.favorites.has(photo.post_id) ? '❤️' : '🤍'}
-                        </button>
-                        <button class="action-btn" onclick="event.stopPropagation(); _0xd9f3('${imgUrl}', '${img.img_id}')">⬇️</button>
-                        <button class="action-btn" onclick="event.stopPropagation(); _0xea04(${photo.post_id})">📤</button>
+                <div class="card-image-wrap">
+                    <img class="card-image" src="${imageUrl}" alt="${item.title || '图片'}" loading="lazy" 
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27360%27 height=%27190%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop stop-color=%27%231f2937%27/%3E%3Cstop offset=%271%27 stop-color=%27%234b5563%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill=%27url(%23g)%27 width=%27360%27 height=%27190%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 fill=%27%239ca3af%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27system-ui%27 font-size=%2714%27%3E图片加载失败%3C/text%3E%3C/svg%3E'">
+                    <div class="image-overlay">
+                        <span class="overlay-pill">❤️ ${formatNumber(item.favorites || 0)} · 💬 ${formatNumber(item.comments || 0)}</span>
+                        <span style="font-size:10px;opacity:0.85;">${publishedText}</span>
                     </div>
                 </div>
                 <div class="card-content">
-                    <div class="card-header"><div class="date">📅 ${date}</div></div>
-                    <h3 class="card-title" onclick="_0xb5d4('${imgUrl}')">${photo.title || '精彩摄影作品'}</h3>
-                    <div class="card-stats">
-                        <div class="stat" onclick="_0xfb15(${photo.post_id})">❤️ <span id="fav-${photo.post_id}">${photo.favorites || 0}</span></div>
-                        <div class="stat">💬 ${photo.comments || 0}</div>
-                        <div class="stat">👁️ ${Math.floor(Math.random() * 10000)}</div>
-                    </div>
-                    ${tags.length > 0 ? `<div class="tags">${tags.map(t => `<span class="tag" onclick="_0x3a4f[4]('${t.trim()}')">#${t.trim()}</span>`).join('')}</div>` : ''}
-                    ${photo.site ? `
-                    <div class="author">
-                        <img class="author-avatar" src="${photo.site.icon}" alt="${photo.site.name}">
-                        <div class="author-info">
-                            <div class="author-name">${photo.site.name}</div>
-                            <div class="author-followers">👥 ${photo.site.followers || 0} 粉丝</div>
+                    <h2 class="card-title">${item.title || '无标题作品'}</h2>
+                    <div class="card-meta">
+                        <div class="stat-group">
+                            <span class="stat-chip">❤ ${formatNumber(item.favorites || 0)}</span>
+                            <span class="stat-chip">💬 ${formatNumber(item.comments || 0)}</span>
                         </div>
-                        <button class="author-follow-btn ${_0x4d8a.following.has(photo.site.name) ? 'following' : ''}" 
-                                onclick="event.stopPropagation(); _0x1c26('${photo.site.name}')">
-                            ${_0x4d8a.following.has(photo.site.name) ? '✓ 已关注' : '+ 关注'}
-                        </button>
-                    </div>` : ''}
-                    <button class="expand-btn" onclick="_0x2d37(${photo.post_id})">📊 查看详细信息</button>
-                    <div class="card-details" id="details-${photo.post_id}">
-                        <div class="detail-row"><span>作品ID</span><span>${photo.post_id}</span></div>
-                        <div class="detail-row"><span>图片尺寸</span><span>${img.width} × ${img.height}</span></div>
-                        <div class="detail-row"><span>发布时间</span><span>${new Date(photo.published_at).toLocaleString('zh-CN')}</span></div>
+                        <span style="font-size:10px;color:#9ca3af;">ID: ${item.post_id || '-'}</span>
+                    </div>
+                    ${tagHtml}
+                    <div class="author">
+                        <img class="author-avatar" src="${site.icon || ''}" alt="${site.name || '作者'}" 
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2730%27 height=%2730%27%3E%3Cdefs%3E%3ClinearGradient id=%27g2%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop stop-color=%27%235b21b6%27/%3E%3Cstop offset=%271%27 stop-color=%27%237c3aed%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx=%2715%27 cy=%2715%27 r=%2715%27 fill=%27url(%23g2)%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 fill=%27%23ede9fe%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27system-ui%27 font-size=%2712%27%3E图%3C/text%3E%3C/svg%3E'">
+                        <div class="author-info">
+                            <div class="author-name">${site.name || '匿名作者'}</div>
+                            <div class="author-desc">${site.description || '图虫优秀创作者'}</div>
+                        </div>
                     </div>
                 </div>
             `;
-
-            // 图片懒加载
-            const imgEl = card.querySelector('.card-image');
-            const skeleton = card.querySelector('.image-skeleton');
-            const obs = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const i = new Image();
-                        i.onload = () => {
-                            imgEl.src = imgEl.dataset.src;
-                            imgEl.classList.add('loaded');
-                            skeleton.style.display = 'none';
-                        };
-                        i.onerror = () => {
-                            skeleton.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;">图片加载失败</div>';
-                        };
-                        i.src = imgEl.dataset.src;
-                        obs.unobserve(imgEl);
-                    }
-                });
-            }, { threshold: 0.1 });
-            obs.observe(imgEl);
-
-            return card;
-        }
-
-        // 辅助函数（混淆命名）
-        function _0xb5d4(url) { // openModal
-            document.getElementById('modalImage').src = url;
-            document.getElementById('imageModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function _0xc8e2(id) { // toggleFavorite
-            if (_0x4d8a.favorites.has(id)) {
-                _0x4d8a.favorites.delete(id);
-                _0x8e4a('💔 已取消收藏');
-            } else {
-                _0x4d8a.favorites.add(id);
-                _0x8e4a('❤️ 已添加到收藏');
-            }
-            localStorage.setItem('_0xf4v', JSON.stringify([..._0x4d8a.favorites]));
-            _0x9d7a();
-            const card = document.querySelector(`[data-post-id="${id}"]`);
-            if (card) {
-                card.classList.toggle('favorited');
-                const btn = card.querySelector('.action-btn');
-                if (btn) {
-                    btn.textContent = _0x4d8a.favorites.has(id) ? '❤️' : '🤍';
-                    btn.classList.toggle('favorited');
-                }
-            }
-        }
-
-        function _0xd9f3(url, id) { // downloadImage
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `tuchong_${id}.jpg`;
-            a.target = '_blank';
-            a.click();
-            _0x8e4a('⬇️ 开始下载图片');
-        }
-
-        function _0xea04(id) { // sharePhoto
-            const url = `https://tuchong.com/${id}`;
-            if (navigator.share) {
-                navigator.share({ url: url });
-            } else {
-                navigator.clipboard.writeText(url);
-                _0x8e4a('📋 链接已复制到剪贴板');
-            }
-        }
-
-        function _0x1c26(name) { // toggleFollow
-            if (_0x4d8a.following.has(name)) {
-                _0x4d8a.following.delete(name);
-                _0x8e4a(`已取消关注 ${name}`);
-            } else {
-                _0x4d8a.following.add(name);
-                _0x8e4a(`✓ 已关注 ${name}`);
-            }
-            localStorage.setItem('_0xf0l', JSON.stringify([..._0x4d8a.following]));
-            _0x6b2c();
-        }
-
-        function _0xfb15(id) { // likePhoto
-            const el = document.getElementById(`fav-${id}`);
-            if (el) {
-                el.textContent = parseInt(el.textContent) + 1;
-                _0x8e4a('👍 已点赞');
-            }
-        }
-
-        function _0x2d37(id) { // toggleDetails
-            const d = document.getElementById(`details-${id}`);
-            d.classList.toggle('expanded');
-        }
-
-        function _0x8e4a(msg) { // showToast
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
-        function _0x9d7a() { // updateStats
-            document.getElementById('totalPhotos').textContent = _0x4d8a.photos.length;
-            document.getElementById('totalFavorites').textContent = 
-                _0x4d8a.photos.reduce((s, p) => s + (p.favorites || 0), 0);
-            document.getElementById('totalAuthors').textContent = 
-                new Set(_0x4d8a.photos.map(p => p.site?.name).filter(Boolean)).size;
-            document.getElementById('myFavorites').textContent = _0x4d8a.favorites.size;
-        }
-
-        // 加载更多
-        document.getElementById('loadMore').addEventListener('click', () => {
-            const btn = document.getElementById('loadMore');
-            btn.disabled = true;
-            btn.textContent = '加载中...';
-            _0x1f9e().then(() => {
-                btn.disabled = false;
-                btn.textContent = '加载更多作品';
-            });
+            gallery.appendChild(card);
         });
+    }
 
-        // 搜索框回车
-        document.getElementById('searchInput').addEventListener('keypress', e => {
-            if (e.key === 'Enter') _0x3a4f[0]();
-        });
+    function formatNumber(num) {
+        if (num >= 10000) return (num / 10000).toFixed(1) + 'w';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+        return num.toString();
+    }
 
-        // 初始加载
-        _0x1f9e();
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
 
-        // 额外保护 - 定时检查
-        setInterval(() => {
-            if (!document.body.innerHTML.includes('图虫')) {
-                location.reload();
-            }
-        }, 5000);
-    </script>
+    function copyText(text, btn) {
+        if (!navigator.clipboard) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        } else {
+            navigator.clipboard.writeText(text).catch(() => {});
+        }
+        const original = btn.innerHTML;
+        btn.innerHTML = '<span>已复制</span>';
+        setTimeout(() => btn.innerHTML = original, 1200);
+    }
+
+    loadMoreBtn.addEventListener('click', fetchImages);
+    fetchImages();
+</script>
 </body>
 </html>
