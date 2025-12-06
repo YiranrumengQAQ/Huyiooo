@@ -1,1071 +1,882 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图虫推荐图片展示 & 接口说明</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-gradient-start: #4e54c8;
-            --bg-gradient-end: #8f94fb;
-            --card-radius: 16px;
-            --shadow-soft: 0 10px 25px rgba(0,0,0,0.12);
-            --shadow-hover: 0 18px 35px rgba(0,0,0,0.18);
-            --accent: #ff9f43;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            min-height: 100vh;
-            background: radial-gradient(circle at top left, #ffd3a5 0%, transparent 55%),
-                        radial-gradient(circle at bottom right, #fd6585 0%, transparent 55%),
-                        linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
-            padding: 30px 16px;
-            color: #222;
-            overflow-x: hidden;
-        }
-
-        .app-shell {
-            max-width: 1280px;
-            margin: 0 auto;
-            backdrop-filter: blur(16px);
-            background: rgba(255,255,255,0.12);
-            border-radius: 24px;
-            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.55);
-            border: 1px solid rgba(255,255,255,0.18);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .app-shell::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at top, rgba(255,255,255,0.26), transparent 55%);
-            opacity: 0.65;
-            pointer-events: none;
-        }
-
-        header {
-            position: relative;
-            padding: 22px 26px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.28);
-            background: linear-gradient(120deg, rgba(15,23,42,0.88), rgba(88,28,135,0.92));
-            color: #fff;
-            overflow: hidden;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            z-index: 1;
-        }
-
-        .logo-mark {
-            width: 40px;
-            height: 40px;
-            border-radius: 18px;
-            background: conic-gradient(from 180deg, #ff9f43, #ff6b6b, #48dbfb, #1dd1a1, #ff9f43);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.35);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .logo-mark::after {
-            content: '';
-            position: absolute;
-            inset: 3px;
-            border-radius: 15px;
-            background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.9) 0, transparent 42%),
-                        radial-gradient(circle at 80% 85%, rgba(0,0,0,0.28) 0, transparent 55%),
-                        linear-gradient(145deg, #1f2933, #111827);
-        }
-
-        .logo-mark span {
-            position: relative;
-            font-weight: 800;
-            font-size: 20px;
-            color: #fff;
-            text-shadow: 0 3px 8px rgba(0,0,0,0.55);
-        }
-
-        .logo-text h1 {
-            font-size: 20px;
-            margin-bottom: 4px;
-            letter-spacing: 0.04em;
-        }
-
-        .logo-text p {
-            font-size: 12px;
-            opacity: 0.85;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 1;
-        }
-
-        .pill {
-            padding: 6px 12px;
-            border-radius: 999px;
-            background: rgba(15,23,42,0.7);
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid rgba(248,250,252,0.22);
-        }
-
-        .pill-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #22c55e;
-            box-shadow: 0 0 0 6px rgba(34,197,94,0.35);
-            animation: pulse 1.4s infinite;
-        }
-
-        .tab-switcher {
-            display: inline-flex;
-            padding: 3px;
-            border-radius: 999px;
-            background: rgba(15,23,42,0.8);
-            border: 1px solid rgba(248,250,252,0.26);
-        }
-
-        .tab-btn {
-            border: none;
-            border-radius: 999px;
-            padding: 6px 14px;
-            font-size: 12px;
-            cursor: pointer;
-            background: transparent;
-            color: #e5e7eb;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.25s ease;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, #f97316, #facc15);
-            color: #111827;
-            box-shadow: 0 8px 18px rgba(248, 159, 31, 0.6);
-        }
-
-        main {
-            position: relative;
-            padding: 18px 20px 22px;
-            backdrop-filter: blur(10px);
-            background: radial-gradient(circle at top left, rgba(255,255,255,0.45) 0, transparent 55%),
-                        radial-gradient(circle at bottom right, rgba(15,23,42,0.9) 0, rgba(15,23,42,0.98) 60%);
-        }
-
-        .layout {
-            display: grid;
-            grid-template-columns: 2.1fr 1.3fr;
-            gap: 18px;
-        }
-
-        .panel {
-            position: relative;
-            background: linear-gradient(145deg, rgba(15,23,42,0.96), rgba(30,64,175,0.96));
-            border-radius: 22px;
-            padding: 16px 16px 18px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(148,163,184,0.55);
-            overflow: hidden;
-            color: #e5e7eb;
-        }
-
-        .panel::before {
-            content: '';
-            position: absolute;
-            inset: -40%;
-            background: radial-gradient(circle at 0 0, rgba(96,165,250,0.26) 0, transparent 50%),
-                        radial-gradient(circle at 100% 100%, rgba(59,130,246,0.18) 0, transparent 50%);
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        .panel-header {
-            position: relative;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .panel-title {
-            font-size: 15px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .panel-title span.icon {
-            width: 22px;
-            height: 22px;
-            border-radius: 999px;
-            background: radial-gradient(circle at 30% 20%, #fef9c3 0, #f97316 50%, #7c2d12 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 16px rgba(248, 152, 40, 0.7);
-            font-size: 13px;
-        }
-
-        .panel-subtitle {
-            font-size: 11px;
-            color: #9ca3af;
-        }
-
-        .badge {
-            font-size: 10px;
-            padding: 3px 9px;
-            border-radius: 999px;
-            background: rgba(15,118,110,0.22);
-            border: 1px solid rgba(45,212,191,0.65);
-            color: #a5f3fc;
-        }
-
-        .gallery {
-            position: relative;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 12px;
-            margin-top: 4px;
-            max-height: 530px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .gallery::-webkit-scrollbar,
-        .params-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .gallery::-webkit-scrollbar-thumb,
-        .params-scroll::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #4ade80, #22c55e);
-            border-radius: 999px;
-        }
-
-        .card {
-            position: relative;
-            border-radius: var(--card-radius);
-            overflow: hidden;
-            background: radial-gradient(circle at top left, rgba(248,250,252,0.96) 0, rgba(226,232,240,0.98) 50%, rgba(203,213,225,0.98) 100%);
-            box-shadow: 0 16px 40px rgba(15,23,42,0.5);
-            transform-origin: center;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, translate 0.25s ease;
-            cursor: pointer;
-            animation: card-in 0.55s ease both;
-        }
-
-        .card:hover {
-            transform: translateY(-8px) scale(1.01);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(248,250,252,0.6), transparent 55%);
-            opacity: 0;
-            transition: opacity 0.35s ease;
-            pointer-events: none;
-        }
-
-        .card:hover::before {
-            opacity: 1;
-        }
-
-        .card-image-wrap {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card-image {
-            width: 100%;
-            height: 190px;
-            object-fit: cover;
-            display: block;
-            transition: transform 0.6s ease;
-            background: #020617;
-        }
-
-        .card:hover .card-image {
-            transform: scale(1.07) rotate(-0.4deg);
-        }
-
-        .image-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(15,23,42,0.85), transparent 55%);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 10px 12px;
-            color: #f9fafb;
-            font-size: 11px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.25s ease;
-        }
-
-        .card:hover .image-overlay {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .overlay-pill {
-            padding: 4px 8px;
-            border-radius: 999px;
-            background: rgba(15,23,42,0.8);
-            border: 1px solid rgba(156,163,175,0.8);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .card-content {
-            padding: 11px 12px 12px;
-        }
-
-        .card-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 6px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .card-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-
-        .stat-group {
-            display: flex;
-            gap: 8px;
-            font-size: 11px;
-            color: #6b7280;
-        }
-
-        .stat-chip {
-            padding: 3px 7px;
-            border-radius: 999px;
-            background: rgba(249,250,251,0.8);
-            border: 1px solid rgba(209,213,219,0.9);
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-        }
-
-        .tag-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-bottom: 7px;
-        }
-
-        .tag {
-            font-size: 10px;
-            padding: 2px 7px;
-            border-radius: 999px;
-            background: rgba(37,99,235,0.06);
-            color: #1d4ed8;
-            border: 1px solid rgba(96,165,250,0.4);
-        }
-
-        .author {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding-top: 7px;
-            border-top: 1px dashed rgba(209,213,219,0.9);
-        }
-
-        .author-avatar {
-            width: 26px;
-            height: 26px;
-            border-radius: 999px;
-            object-fit: cover;
-            border: 1px solid rgba(148,163,184,0.9);
-            box-shadow: 0 0 0 2px rgba(226,232,240,0.9);
-        }
-
-        .author-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .author-name {
-            font-size: 11px;
-            color: #111827;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .author-desc {
-            font-size: 10px;
-            color: #6b7280;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .loading {
-            text-align: center;
-            color: #e5e7eb;
-            font-size: 13px;
-            padding: 14px 0 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border-radius: 999px;
-            border: 2px solid rgba(148,163,184,0.8);
-            border-top-color: #38bdf8;
-            animation: spin 0.8s linear infinite;
-        }
-
-        .load-more-wrap {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            margin-top: 6px;
-        }
-
-        .load-more {
-            border: none;
-            border-radius: 999px;
-            padding: 7px 16px;
-            background: linear-gradient(135deg, #22c55e, #4ade80);
-            color: #022c22;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 12px 25px rgba(34,197,94,0.55);
-            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
-        }
-
-        .load-more:hover {
-            transform: translateY(-1px) scale(1.01);
-            box-shadow: 0 16px 35px rgba(34,197,94,0.7);
-            filter: brightness(1.04);
-        }
-
-        .load-more:active {
-            transform: translateY(1px) scale(0.99);
-            box-shadow: 0 8px 18px rgba(34,197,94,0.55);
-        }
-
-        .load-more:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .error {
-            margin-top: 8px;
-            padding: 7px 10px;
-            border-radius: 12px;
-            background: rgba(248,113,113,0.08);
-            border: 1px solid rgba(248,113,113,0.5);
-            color: #fecaca;
-            font-size: 11px;
-            display: none;
-        }
-
-        /* 右侧：接口说明 */
-        .params-scroll {
-            position: relative;
-            max-height: 530px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .section-title {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: #e5e7eb;
-            margin-bottom: 6px;
-        }
-
-        .chip-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-
-        .chip {
-            font-size: 10px;
-            padding: 3px 8px;
-            border-radius: 999px;
-            border: 1px solid rgba(148,163,184,0.65);
-            background: rgba(15,23,42,0.9);
-            color: #e5e7eb;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .endpoint-card {
-            border-radius: 16px;
-            padding: 10px 11px;
-            background: radial-gradient(circle at top, rgba(30,64,175,0.9) 0, rgba(15,23,42,0.96) 52%);
-            border: 1px solid rgba(129,140,248,0.7);
-            margin-bottom: 10px;
-        }
-
-        .endpoint-url {
-            font-family: SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-            font-size: 11px;
-            color: #bfdbfe;
-            background: rgba(15,23,42,0.85);
-            padding: 6px 8px;
-            border-radius: 9px;
-            margin-top: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .copy-btn {
-            border: none;
-            border-radius: 999px;
-            padding: 3px 7px;
-            font-size: 10px;
-            cursor: pointer;
-            background: rgba(59,130,246,0.15);
-            color: #bfdbfe;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-        }
-
-        .field-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 6px;
-            border-radius: 12px;
-            overflow: hidden;
-            background: rgba(15,23,42,0.9);
-        }
-
-        .field-table thead {
-            background: linear-gradient(90deg, rgba(30,64,175,0.9), rgba(37,99,235,0.9));
-        }
-
-        .field-table th,
-        .field-table td {
-            padding: 6px 8px;
-            font-size: 11px;
-            text-align: left;
-            border-bottom: 1px solid rgba(30,64,175,0.7);
-        }
-
-        .field-table th {
-            color: #e5e7eb;
-        }
-
-        .field-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .field-name {
-            color: #bfdbfe;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .field-type {
-            color: #a5b4fc;
-            white-space: nowrap;
-        }
-
-        .field-desc {
-            color: #e5e7eb;
-        }
-
-        .warn-box {
-            margin-top: 10px;
-            padding: 7px 9px;
-            border-radius: 12px;
-            background: rgba(248,250,252,0.06);
-            border: 1px dashed rgba(248,250,252,0.42);
-            font-size: 11px;
-            color: #e5e7eb;
-            display: flex;
-            gap: 8px;
-        }
-
-        .warn-icon {
-            width: 18px;
-            height: 18px;
-            border-radius: 999px;
-            border: 1px solid rgba(252,211,77,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            color: #facc15;
-        }
-
-        .badge-error {
-            background: rgba(239,68,68,0.18);
-            border-color: rgba(248,113,113,0.9);
-            color: #fecaca;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.35);
-                opacity: 0.4;
-            }
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes card-in {
-            from {
-                opacity: 0;
-                transform: translateY(18px) scale(0.97);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @media (max-width: 960px) {
-            .layout {
-                grid-template-columns: 1fr;
-            }
-            main {
-                padding: 14px;
-            }
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            body {
-                padding: 16px 10px;
-            }
-            .app-shell {
-                border-radius: 18px;
-            }
-            .gallery {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>图虫灵感气泡画廊</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --green: #22c55e;
+      --green-soft: #bbf7d0;
+      --green-dark: #15803d;
+      --bg: #e5f7ee;
+      --bubble: #f9fffb;
+      --text-main: #064e3b;
+      --text-sub: #6b7280;
+      --shadow-soft: 0 18px 40px rgba(15, 118, 110, 0.18);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      background: radial-gradient(circle at top left, #bbf7d0 0, transparent 55%),
+                  radial-gradient(circle at bottom right, #a5f3fc 0, transparent 55%),
+                  linear-gradient(135deg, #ecfdf3, #e0f2fe);
+      min-height: 100vh;
+      padding: 18px 10px;
+      color: var(--text-main);
+    }
+    .app {
+      max-width: 1240px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 32px;
+      box-shadow: 0 22px 60px rgba(22, 101, 52, 0.32);
+      padding: 16px 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .app::before {
+      content: '';
+      position: absolute;
+      width: 340px; height: 340px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(34, 197, 94, 0.32), transparent 70%);
+      top: -160px; right: -80px;
+      pointer-events: none;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 42px; height: 42px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #fefce8 0, #22c55e 35%, #16a34a 60%, #15803d 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 35px rgba(22, 163, 74, 0.6);
+    }
+    .brand-logo span {
+      font-weight: 800;
+      font-size: 20px;
+      color: #ecfdf3;
+      text-shadow: 0 3px 8px rgba(21, 128, 61, 0.9);
+    }
+    .brand-text h1 {
+      font-size: 19px;
+      margin-bottom: 2px;
+    }
+    .brand-text p {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: rgba(236, 253, 245, 0.9);
+      border-radius: 999px;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      box-shadow: 0 10px 22px rgba(22, 101, 52, 0.25);
+    }
+    .search-bar input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 12px;
+      color: var(--text-main);
+      min-width: 140px;
+    }
+    .search-bar input::placeholder {
+      color: #9ca3af;
+    }
+    .search-tag-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      background: white;
+      color: var(--green-dark);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(22, 163, 74, 0.32);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .search-tag-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(22, 163, 74, 0.46);
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+    .pill-filter {
+      border-radius: 999px;
+      padding: 3px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(240, 253, 244, 0.95);
+      font-size: 10px;
+      color: var(--text-sub);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .pill-filter.active {
+      background: var(--green);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(22, 163, 74, 0.5);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 3fr 1.4fr;
+      gap: 14px;
+    }
+    .bubble-panel {
+      background: var(--bubble);
+      border-radius: 26px;
+      padding: 11px 12px 12px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .bubble-panel::before {
+      content: '';
+      position: absolute;
+      width: 160px; height: 160px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(187, 247, 208, 0.7), transparent 70%);
+      top: -80px; left: -40px;
+      opacity: 0.75;
+      pointer-events: none;
+    }
+    .bubble-header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .bubble-header h2 {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bubble-header h2 span.icon {
+      width: 22px; height: 22px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #bbf7d0 0, #22c55e 45%, #16a34a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #ecfdf5;
+      box-shadow: 0 9px 18px rgba(21, 128, 61, 0.6);
+    }
+    .bubble-sub {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .gallery {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 10px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .gallery::-webkit-scrollbar,
+    .side-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .gallery::-webkit-scrollbar-thumb,
+    .side-scroll::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #86efac, #22c55e);
+      border-radius: 999px;
+    }
+
+    .card {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #ecfdf3;
+      box-shadow: 0 14px 36px rgba(22, 101, 52, 0.45);
+      cursor: pointer;
+      transform-origin: center;
+      animation: float-in 0.6s ease both;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, translate 0.22s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 20px 48px rgba(22, 101, 52, 0.75);
+    }
+    .card-image-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 22px;
+      margin: 6px 6px 0;
+    }
+    .card-image {
+      width: 100%; height: 180px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+      background: #022c22;
+    }
+    .card:hover .card-image {
+      transform: scale(1.06);
+    }
+    .image-top-bar {
+      position: absolute;
+      top: 8px; left: 8px; right: 8px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    .bubble-label {
+      backdrop-filter: blur(12px);
+      background: rgba(15, 118, 110, 0.7);
+      color: #ecfdf5;
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 8px 16px rgba(15, 118, 110, 0.7);
+    }
+    .image-bottom-bar {
+      position: absolute;
+      left: 8px; right: 8px; bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+    .stats-pill {
+      backdrop-filter: blur(16px);
+      background: rgba(15, 23, 42, 0.7);
+      color: #f9fafb;
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.7);
+    }
+    .download-btn-small {
+      pointer-events: auto;
+      border: none;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 10px;
+      background: #f9fafb;
+      color: var(--green-dark);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(22, 163, 74, 0.65);
+    }
+
+    .card-body {
+      padding: 8px 10px 9px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: #052e16;
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 7px;
+    }
+    .tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(22, 163, 74, 0.07);
+      color: var(--green-dark);
+      border: 1px solid rgba(22, 163, 74, 0.32);
+    }
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .author {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .author-avatar {
+      width: 24px; height: 24px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 1px solid rgba(34, 197, 94, 0.8);
+      box-shadow: 0 0 0 2px #ecfdf3;
+    }
+    .author-text {
+      font-size: 10px;
+    }
+    .author-name {
+      font-weight: 600;
+    }
+    .author-sub {
+      color: var(--text-sub);
+    }
+    .meta-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .meta-chip {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #ecfdf3;
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .download-main-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      background: var(--green);
+      color: #ecfdf3;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(34, 197, 94, 0.7);
+    }
+
+    .loading {
+      font-size: 12px;
+      color: var(--text-sub);
+      padding: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+    .spinner {
+      width: 18px; height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(148, 163, 184, 0.8);
+      border-top-color: var(--green);
+      animation: spin 0.85s linear infinite;
+    }
+    .error {
+      margin-top: 6px;
+      padding: 6px 9px;
+      border-radius: 14px;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 11px;
+      display: none;
+    }
+    .load-more-wrap {
+      margin-top: 6px;
+      display: flex;
+      justify-content: center;
+    }
+    .load-more {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 11px;
+      background: #bbf7d0;
+      color: var(--green-dark);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(22, 163, 74, 0.55);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .load-more:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(21, 128, 61, 0.7);
+    }
+    .load-more:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .side-scroll {
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .side-card {
+      background: #ecfdf3;
+      border-radius: 24px;
+      padding: 10px 11px 11px;
+      box-shadow: 0 12px 28px rgba(22, 101, 52, 0.3);
+      border: 1px solid rgba(22, 163, 74, 0.3);
+    }
+    .side-title {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .quick-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .quick-tag {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #f0fdf4;
+      border: 1px solid rgba(22, 163, 74, 0.4);
+      color: var(--green-dark);
+      cursor: pointer;
+    }
+    .hint {
+      font-size: 10px;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+    }
+    .mode-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .mode-btn {
+      flex: 1;
+      border-radius: 999px;
+      border: none;
+      padding: 6px 0;
+      font-size: 11px;
+      background: #f0fdf4;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+    .mode-btn.active {
+      background: var(--green);
+      color: white;
+      box-shadow: 0 10px 22px rgba(22, 163, 74, 0.7);
+    }
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    .switch {
+      position: relative;
+      width: 38px; height: 20px;
+      border-radius: 999px;
+      background: #d1fae5;
+      cursor: pointer;
+    }
+    .switch-circle {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 999px;
+      background: white;
+      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.55);
+      transition: transform 0.2s ease;
+    }
+    .switch.on {
+      background: #22c55e;
+    }
+    .switch.on .switch-circle {
+      transform: translateX(18px);
+    }
+    .side-note {
+      padding: 6px 7px;
+      border-radius: 14px;
+      background: #f0fdf4;
+      font-size: 10px;
+      color: var(--text-sub);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes float-in {
+      from { opacity: 0; transform: translateY(18px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; }
+      header { flex-direction: column; align-items: flex-start; }
+      .actions { align-items: stretch; }
+    }
+    @media (max-width: 640px) {
+      body { padding: 12px 6px; }
+      .app { border-radius: 22px; padding: 12px 10px 14px; }
+      .gallery { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-<div class="app-shell">
-    <header>
-        <div class="logo-area">
-            <div class="logo-mark"><span>TC</span></div>
-            <div class="logo-text">
-                <h1>图虫推荐图 & API 控制台</h1>
-                <p>实时浏览精美图片，同时查看接口字段说明</p>
-            </div>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brand-logo"><span>TC</span></div>
+      <div class="brand-text">
+        <h1>图虫灵感气泡画廊</h1>
+        <p>搜索、筛选、收藏和下载灵感图片的轻盈空间</p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="search-bar">
+        <input id="searchInput" type="text" placeholder="按标题或标签搜索，例如：风光 / 人像" />
+        <button class="search-tag-btn" id="searchBtn" type="button">🔍 搜索</button>
+      </div>
+      <div class="filter-row">
+        <button class="pill-filter active" data-filter="all" type="button">全部</button>
+        <button class="pill-filter" data-filter="popular" type="button">高热度</button>
+        <button class="pill-filter" data-filter="latest" type="button">最新</button>
+        <button class="pill-filter" data-filter="fav" type="button">我喜欢</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="bubble-panel">
+      <div class="bubble-header">
+        <div>
+          <h2><span class="icon">🌱</span>灵感图片流</h2>
+          <p class="bubble-sub">滚动浏览，或通过上方搜索框快速定位你想要的风格</p>
         </div>
-        <div class="header-right">
-            <div class="pill">
-                <span class="pill-dot"></span>
-                <span>在线 · 通过官方推荐源</span>
-            </div>
-            <div class="tab-switcher" aria-label="模式切换，仅视觉装饰">
-                <button class="tab-btn active" type="button">图片浏览</button>
-                <button class="tab-btn" type="button">参数说明</button>
-            </div>
+      </div>
+      <div id="loading" class="loading">
+        <span class="spinner"></span>
+        <span>正在获取灵感图片，请稍候…</span>
+      </div>
+      <div id="error" class="error"></div>
+      <div id="gallery" class="gallery"></div>
+      <div class="load-more-wrap">
+        <button id="loadMore" class="load-more" style="display:none;" type="button">
+          <span>加载更多图片</span>
+          <span>↓</span>
+        </button>
+      </div>
+    </section>
+
+    <aside class="bubble-panel">
+      <div class="side-scroll">
+        <div class="side-card">
+          <h3 class="side-title">小助手 · 快速操作</h3>
+          <p class="hint">试试点击下面的标签，快速筛出对应风格的推荐图片。</p>
+          <div class="quick-tags">
+            <button class="quick-tag" data-tag="风光" type="button"># 风光</button>
+            <button class="quick-tag" data-tag="人像" type="button"># 人像</button>
+            <button class="quick-tag" data-tag="街拍" type="button"># 街拍</button>
+            <button class="quick-tag" data-tag="旅行" type="button"># 旅行</button>
+            <button class="quick-tag" data-tag="黑白" type="button"># 黑白</button>
+            <button class="quick-tag" data-tag="城市" type="button"># 城市</button>
+          </div>
+          <div class="mode-row">
+            <button class="mode-btn active" id="modeRecommend" type="button">推荐模式</button>
+            <button class="mode-btn" id="modeExplore" type="button">探索模式</button>
+          </div>
+          <div class="switch-row">
+            <span>优先显示高赞图片</span>
+            <div class="switch on" id="switchPopular"><div class="switch-circle"></div></div>
+          </div>
+          <div class="switch-row">
+            <span>仅展示有标签的作品</span>
+            <div class="switch" id="switchHasTag"><div class="switch-circle"></div></div>
+          </div>
+          <div class="side-note">
+            提示：点击图片卡片可以打开原页面详情；点击下载按钮可以保存当前预览图（具体清晰度取决于接口返回的图片尺寸）。
+          </div>
         </div>
-    </header>
-
-    <main>
-        <div class="layout">
-            <!-- 左侧：图片展示 -->
-            <section class="panel">
-                <div class="panel-header">
-                    <div>
-                        <div class="panel-title"><span class="icon">📸</span>推荐图片流</div>
-                        <div class="panel-subtitle">自动从 https://api.tuchong.com/feed-app 拉取推荐内容</div>
-                    </div>
-                    <span class="badge">GET · JSON</span>
-                </div>
-
-                <div id="loading" class="loading">
-                    <span class="spinner"></span>
-                    <span>正在为你加载最新的图虫推荐图片...</span>
-                </div>
-                <div id="error" class="error"></div>
-                <div id="gallery" class="gallery"></div>
-                <div class="load-more-wrap">
-                    <button id="loadMore" class="load-more" style="display:none;">
-                        <span>加载更多推荐</span>
-                        <span>↓</span>
-                    </button>
-                </div>
-            </section>
-
-            <!-- 右侧：接口参数说明 -->
-            <section class="panel">
-                <div class="panel-header">
-                    <div>
-                        <div class="panel-title"><span class="icon">🧩</span>返回参数说明</div>
-                        <div class="panel-subtitle">快速理解图虫推荐接口返回的关键字段</div>
-                    </div>
-                    <span class="badge">文档视图</span>
-                </div>
-
-                <div class="params-scroll">
-                    <div class="section">
-                        <div class="section-title">基础信息</div>
-                        <div class="chip-row">
-                            <span class="chip">请求方式：<strong>GET</strong></span>
-                            <span class="chip">返回格式：<strong>JSON</strong></span>
-                            <span class="chip">接口状态：<span style="color:#4ade80;">公开可用</span></span>
-                        </div>
-                        <div class="endpoint-card">
-                            <div style="font-size:11px;color:#e5e7eb;">接口地址</div>
-                            <div class="endpoint-url">
-                                <span>https://api.tuchong.com/feed-app</span>
-                                <button class="copy-btn" type="button" onclick="copyText('https://api.tuchong.com/feed-app', this)">
-                                    <span>复制</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section" style="margin-top:10px;">
-                        <div class="section-title">分页参数</div>
-                        <table class="field-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:24%;">名称</th>
-                                    <th style="width:20%;">类型</th>
-                                    <th>说明</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="field-name">post_id</td>
-                                    <td class="field-type">int</td>
-                                    <td class="field-desc">用于翻页；传入上一页最后一条的 post_id，即可获取后续推荐数据</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="section" style="margin-top:10px;">
-                        <div class="section-title">图片内容字段</div>
-                        <table class="field-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:24%;">名称</th>
-                                    <th style="width:20%;">类型</th>
-                                    <th>说明</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="field-name">url</td>
-                                    <td class="field-type">string</td>
-                                    <td class="field-desc">图片所在网页链接，用于跳转到图虫的详情页</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">published_at</td>
-                                    <td class="field-type">string</td>
-                                    <td class="field-desc">图片（或文章）在图虫上的发表日期</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">favorites</td>
-                                    <td class="field-type">int</td>
-                                    <td class="field-desc">喜欢这张图片的用户数量</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">comments</td>
-                                    <td class="field-type">int</td>
-                                    <td class="field-desc">这张图片下的评论数量</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">image</td>
-                                    <td class="field-type">object</td>
-                                    <td class="field-desc">图片宽高等信息（实际返回中通常为 images 数组）</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">img_id</td>
-                                    <td class="field-type">string</td>
-                                    <td class="field-desc">单张图片的标识，可与 user_id 组合生成图片直链</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">title</td>
-                                    <td class="field-type">string</td>
-                                    <td class="field-desc">图片或作品标题</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">tags</td>
-                                    <td class="field-type">string / array</td>
-                                    <td class="field-desc">标签信息，用于描述图片内容或主题</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="section" style="margin-top:10px;">
-                        <div class="section-title">作者信息字段（site）</div>
-                        <table class="field-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:24%;">名称</th>
-                                    <th style="width:20%;">类型</th>
-                                    <th>说明</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="field-name">site</td>
-                                    <td class="field-type">object</td>
-                                    <td class="field-desc">作者信息对象，包含昵称、主页等</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">name</td>
-                                    <td class="field-type">string</td>
-                                    <td class="field-desc">作者昵称</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">description</td>
-                                    <td class="field-type">string</td>
-                                    <td class="field-desc">作者个性签名或简介</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">url</td>
-                                    <td class="field-type">string</td>
-                                    <td class="field-desc">作者主页链接</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">icon</td>
-                                    <td class="field-type">string</td>
-                                    <td class="field-desc">作者头像地址</td>
-                                </tr>
-                                <tr>
-                                    <td class="field-name">followers</td>
-                                    <td class="field-type">int</td>
-                                    <td class="field-desc">粉丝数量</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="section" style="margin-top:10px;">
-                        <div class="section-title">错误码</div>
-                        <table class="field-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:24%;">错误码</th>
-                                    <th>说明</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="field-name">405</td>
-                                    <td class="field-desc">你没有操作的权限（例如访问受限资源时）</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="warn-box badge-error" style="margin-top:8px;">
-                            <div class="warn-icon">!</div>
-                            <div>
-                                <div>提示</div>
-                                <div>调用接口时请遵守图虫平台使用条款，不要进行批量爬取或恶意抓取。</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </main>
+      </div>
+    </aside>
+  </div>
 </div>
 
 <script>
-    const API_URL = 'https://api.tuchong.com/feed-app';
-    let lastPostId = null;
-    let isLoading = false;
+  const API_URL = 'https://api.tuchong.com/feed-app';
+  let lastPostId = null;
+  let isLoading = false;
+  let allItems = [];
+  let likedIds = new Set();
 
-    const gallery = document.getElementById('gallery');
-    const loadingDiv = document.getElementById('loading');
-    const errorDiv = document.getElementById('error');
-    const loadMoreBtn = document.getElementById('loadMore');
+  const gallery = document.getElementById('gallery');
+  const loadingDiv = document.getElementById('loading');
+  const errorDiv = document.getElementById('error');
+  const loadMoreBtn = document.getElementById('loadMore');
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
 
-    async function fetchImages() {
-        if (isLoading) return;
-        isLoading = true;
-        loadingDiv.style.display = 'flex';
-        loadMoreBtn.disabled = true;
-        errorDiv.style.display = 'none';
+  const filterButtons = document.querySelectorAll('.pill-filter');
+  let currentFilter = 'all';
 
-        try {
-            const url = lastPostId ? `${API_URL}?post_id=${lastPostId}` : API_URL;
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP 状态: ${response.status}`);
-            }
-            const data = await response.json();
+  const switchPopular = document.getElementById('switchPopular');
+  const switchHasTag = document.getElementById('switchHasTag');
+  let onlyPopular = true;
+  let onlyHasTag = false;
 
-            if (data.feedList && data.feedList.length > 0) {
-                displayImages(data.feedList);
-                lastPostId = data.feedList[data.feedList.length - 1].post_id;
-                loadMoreBtn.style.display = 'inline-flex';
-            } else {
-                showError('没有更多图片了');
-            }
-        } catch (e) {
-            showError('加载失败：' + e.message);
-        } finally {
-            isLoading = false;
-            loadingDiv.style.display = 'none';
-            loadMoreBtn.disabled = false;
-        }
+  const modeRecommend = document.getElementById('modeRecommend');
+  const modeExplore = document.getElementById('modeExplore');
+  let mode = 'recommend';
+
+  async function fetchImages() {
+    if (isLoading) return;
+    isLoading = true;
+    loadingDiv.style.display = 'flex';
+    loadMoreBtn.disabled = true;
+    errorDiv.style.display = 'none';
+
+    try {
+      const url = lastPostId ? `${API_URL}?post_id=${lastPostId}` : API_URL;
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`HTTP: ${resp.status}`);
+      const data = await resp.json();
+      if (Array.isArray(data.feedList) && data.feedList.length > 0) {
+        const newItems = data.feedList.filter(i => i.type !== 'post' || i.images);
+        allItems = allItems.concat(newItems);
+        lastPostId = data.feedList[data.feedList.length - 1].post_id;
+        applyAndRender();
+        loadMoreBtn.style.display = 'inline-flex';
+      } else {
+        showError('已经没有更多图片了');
+      }
+    } catch (e) {
+      showError('加载失败：' + e.message);
+    } finally {
+      isLoading = false;
+      loadingDiv.style.display = 'none';
+      loadMoreBtn.disabled = false;
     }
+  }
 
-    function displayImages(feedList) {
-        feedList.forEach((item, index) => {
-            if (!item.images || item.images.length === 0) return;
-            const image = item.images[0];
-            const userId = image.user_id || (item.site && item.site.site_id) || '';
-            const imageUrl = userId && image.img_id
-                ? `https://photo.tuchong.com/${userId}/f/${image.img_id}.jpg`
-                : '';
+  function applyAndRender() {
+    const keyword = searchInput.value.trim().toLowerCase();
+    let items = allItems.slice();
 
-            const card = document.createElement('article');
-            card.className = 'card';
-            card.style.animationDelay = (index * 40) + 'ms';
-            card.onclick = () => {
-                if (item.url) {
-                    window.open(item.url, '_blank');
-                }
-            };
-
-            const tagHtml = item.tags && item.tags.length
-                ? `<div class="tag-row">${item.tags.slice(0, 3).map(t => `<span class="tag">#${t}</span>`).join('')}</div>`
-                : '';
-
-            const site = item.site || {};
-            const publishedText = item.published_at ? new Date(item.published_at).toLocaleString() : '时间未知';
-
-            card.innerHTML = `
-                <div class="card-image-wrap">
-                    <img class="card-image" src="${imageUrl}" alt="${item.title || '图片'}" loading="lazy" 
-                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27360%27 height=%27190%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop stop-color=%27%231f2937%27/%3E%3Cstop offset=%271%27 stop-color=%27%234b5563%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill=%27url(%23g)%27 width=%27360%27 height=%27190%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 fill=%27%239ca3af%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27system-ui%27 font-size=%2714%27%3E图片加载失败%3C/text%3E%3C/svg%3E'">
-                    <div class="image-overlay">
-                        <span class="overlay-pill">❤️ ${formatNumber(item.favorites || 0)} · 💬 ${formatNumber(item.comments || 0)}</span>
-                        <span style="font-size:10px;opacity:0.85;">${publishedText}</span>
-                    </div>
-                </div>
-                <div class="card-content">
-                    <h2 class="card-title">${item.title || '无标题作品'}</h2>
-                    <div class="card-meta">
-                        <div class="stat-group">
-                            <span class="stat-chip">❤ ${formatNumber(item.favorites || 0)}</span>
-                            <span class="stat-chip">💬 ${formatNumber(item.comments || 0)}</span>
-                        </div>
-                        <span style="font-size:10px;color:#9ca3af;">ID: ${item.post_id || '-'}</span>
-                    </div>
-                    ${tagHtml}
-                    <div class="author">
-                        <img class="author-avatar" src="${site.icon || ''}" alt="${site.name || '作者'}" 
-                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2730%27 height=%2730%27%3E%3Cdefs%3E%3ClinearGradient id=%27g2%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop stop-color=%27%235b21b6%27/%3E%3Cstop offset=%271%27 stop-color=%27%237c3aed%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx=%2715%27 cy=%2715%27 r=%2715%27 fill=%27url(%23g2)%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 fill=%27%23ede9fe%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27system-ui%27 font-size=%2712%27%3E图%3C/text%3E%3C/svg%3E'">
-                        <div class="author-info">
-                            <div class="author-name">${site.name || '匿名作者'}</div>
-                            <div class="author-desc">${site.description || '图虫优秀创作者'}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            gallery.appendChild(card);
-        });
+    if (onlyHasTag) {
+      items = items.filter(i => Array.isArray(i.tags) && i.tags.length > 0);
     }
-
-    function formatNumber(num) {
-        if (num >= 10000) return (num / 10000).toFixed(1) + 'w';
-        if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-        return num.toString();
+    if (keyword) {
+      items = items.filter(i => {
+        const title = (i.title || '').toLowerCase();
+        const tags = Array.isArray(i.tags) ? i.tags.join(' ').toLowerCase() : '';
+        return title.includes(keyword) || tags.includes(keyword);
+      });
     }
-
-    function showError(message) {
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
+    if (currentFilter === 'popular' || onlyPopular) {
+      items.sort((a, b) => (b.favorites || 0) - (a.favorites || 0));
+    } else if (currentFilter === 'latest') {
+      items.sort((a, b) => {
+        const da = new Date(a.published_at || 0).getTime();
+        const db = new Date(b.published_at || 0).getTime();
+        return db - da;
+      });
+    } else if (currentFilter === 'fav') {
+      items = items.filter(i => likedIds.has(i.post_id));
     }
+    if (mode === 'explore') {
+      items.sort(() => Math.random() - 0.5);
+    }
+    renderGallery(items);
+  }
 
-    function copyText(text, btn) {
-        if (!navigator.clipboard) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
+  function renderGallery(list) {
+    gallery.innerHTML = '';
+    list.forEach((item, index) => {
+      if (!item.images || item.images.length === 0) return;
+      const image = item.images[0];
+      const userId = image.user_id || (item.site && item.site.site_id) || '';
+      const imgId = image.img_id;
+      const imageUrl = (userId && imgId) ? `https://photo.tuchong.com/${userId}/f/${imgId}.jpg` : '';
+
+      const site = item.site || {};
+      const tags = Array.isArray(item.tags) ? item.tags : [];
+      const liked = likedIds.has(item.post_id);
+
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.style.animationDelay = (index * 40) + 'ms';
+
+      card.addEventListener('click', e => {
+        if (e.target.closest('button')) return;
+        if (item.url) window.open(item.url, '_blank');
+      });
+
+      const tagHtml = tags.length
+        ? `<div class="tag-row">${tags.slice(0, 3).map(t => `<span class="tag">#${t}</span>`).join('')}</div>`
+        : '';
+
+      const title = item.title || '无标题作品';
+      const publishedText = item.published_at ? new Date(item.published_at).toLocaleDateString() : '时间未知';
+
+      card.innerHTML = `
+        <div class="card-image-wrap">
+          <img class="card-image" src="${imageUrl}" alt="${title}" loading="lazy"
+               onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27360%27 height=%27180%27%3E%3Crect width=%27360%27 height=%27180%27 fill=%27%23022c22%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 fill=%27%23a7f3d0%27 font-size=%2714%27 text-anchor=%27middle%27 dominant-baseline=%27middle%27%3E图片加载失败%3C/text%3E%3C/svg%3E'">
+          <div class="image-top-bar">
+            <div class="bubble-label">${tags[0] ? `# ${tags[0]}` : '灵感图片'}</div>
+          </div>
+          <div class="image-bottom-bar">
+            <div class="stats-pill">
+              <span>❤ ${formatNumber(item.favorites || 0)}</span>
+              <span>💬 ${formatNumber(item.comments || 0)}</span>
+            </div>
+            <button class="download-btn-small" type="button">⬇ 下载</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <h2 class="card-title">${title}</h2>
+          ${tagHtml}
+          <div class="meta-row">
+            <div class="author">
+              <img class="author-avatar" src="${site.icon || ''}" alt="${site.name || '作者'}"
+                   onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%2712%27 fill=%27%23145a32%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 fill=%27%23bbf7d0%27 font-size=%2710%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27%3E图%3C/text%3E%3C/svg%3E'">
+              <div class="author-text">
+                <div class="author-name">${site.name || '匿名作者'}</div>
+                <div class="author-sub">${publishedText}</div>
+              </div>
+            </div>
+            <div class="meta-actions">
+              <button class="meta-chip like-btn" type="button">${liked ? '★ 已喜欢' : '☆ 喜欢'}</button>
+              <button class="download-main-btn" type="button">⬇ 保存</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const smallDownload = card.querySelector('.download-btn-small');
+      const mainDownload = card.querySelector('.download-main-btn');
+      const likeBtn = card.querySelector('.like-btn');
+
+      const doDownload = () => {
+        if (!imageUrl) return;
+        const a = document.createElement('a');
+        a.href = imageUrl;
+        a.download = `tuchong_${imgId || 'image'}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+
+      smallDownload.addEventListener('click', e => { e.stopPropagation(); doDownload(); });
+      mainDownload.addEventListener('click', e => { e.stopPropagation(); doDownload(); });
+
+      likeBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (likedIds.has(item.post_id)) {
+          likedIds.delete(item.post_id);
         } else {
-            navigator.clipboard.writeText(text).catch(() => {});
+          likedIds.add(item.post_id);
         }
-        const original = btn.innerHTML;
-        btn.innerHTML = '<span>已复制</span>';
-        setTimeout(() => btn.innerHTML = original, 1200);
-    }
+        applyAndRender();
+      });
 
-    loadMoreBtn.addEventListener('click', fetchImages);
-    fetchImages();
+      gallery.appendChild(card);
+    });
+  }
+
+  function formatNumber(num) {
+    if (num >= 10000) return (num / 10000).toFixed(1) + 'w';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toString();
+  }
+
+  function showError(msg) {
+    errorDiv.textContent = msg;
+    errorDiv.style.display = 'block';
+  }
+
+  searchBtn.addEventListener('click', () => applyAndRender());
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') applyAndRender();
+  });
+
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.getAttribute('data-filter') || 'all';
+      applyAndRender();
+    });
+  });
+
+  switchPopular.addEventListener('click', () => {
+    onlyPopular = !onlyPopular;
+    switchPopular.classList.toggle('on', onlyPopular);
+    applyAndRender();
+  });
+  switchHasTag.addEventListener('click', () => {
+    onlyHasTag = !onlyHasTag;
+    switchHasTag.classList.toggle('on', onlyHasTag);
+    applyAndRender();
+  });
+
+  modeRecommend.addEventListener('click', () => {
+    mode = 'recommend';
+    modeRecommend.classList.add('active');
+    modeExplore.classList.remove('active');
+    applyAndRender();
+  });
+  modeExplore.addEventListener('click', () => {
+    mode = 'explore';
+    modeExplore.classList.add('active');
+    modeRecommend.classList.remove('active');
+    applyAndRender();
+  });
+
+  document.querySelectorAll('.quick-tag').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tag = btn.getAttribute('data-tag') || '';
+      searchInput.value = tag;
+      applyAndRender();
+    });
+  });
+
+  loadMoreBtn.addEventListener('click', fetchImages);
+  fetchImages();
 </script>
 </body>
 </html>
