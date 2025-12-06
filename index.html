@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>浸水·图片精选</title>
+    <title>浸水·图片精选平台</title>
     <style>
         * {
             margin: 0;
@@ -249,43 +249,13 @@
             transition: all 0.3s ease;
         }
 
-        .filter-select:focus {
-            border-color: var(--water-blue);
-        }
-
-        .view-toggle {
-            display: flex;
-            gap: 0.5rem;
-            margin-left: auto;
-        }
-
-        .view-btn {
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 180, 216, 0.1);
-            border: 2px solid rgba(0, 180, 216, 0.3);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .view-btn.active {
-            background: linear-gradient(135deg, var(--primary), var(--water-blue));
-            color: white;
-            border-color: transparent;
-        }
-
         /* 图片画廊 */
         .gallery {
             max-width: 1400px;
             margin: 2rem auto;
             padding: 0 2rem;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
             animation: fadeInUp 0.8s ease-out;
         }
@@ -345,6 +315,7 @@
             opacity: 0;
             transform: translateY(-10px);
             transition: all 0.3s ease;
+            z-index: 10;
         }
 
         .gallery-item:hover .quick-actions {
@@ -378,11 +349,11 @@
         }
 
         .item-info {
-            padding: 1rem;
+            padding: 1.2rem;
         }
 
         .item-title {
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--text-dark);
             margin-bottom: 0.8rem;
@@ -390,7 +361,8 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            min-height: 2.8em;
+            min-height: 3em;
+            line-height: 1.5;
         }
 
         .item-meta {
@@ -413,31 +385,54 @@
             gap: 0.3rem;
         }
 
+        .item-date {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+        }
+
         .author-info {
             display: flex;
-            align-items: center;
-            gap: 0.7rem;
+            align-items: flex-start;
+            gap: 0.8rem;
             padding-top: 0.8rem;
             border-top: 1px solid rgba(0, 180, 216, 0.1);
         }
 
+        .author-avatar-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+
         .author-avatar {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--water-light);
             background: linear-gradient(135deg, var(--water-lighter), var(--water-light));
-            flex-shrink: 0;
+            display: block;
         }
 
-        .author-avatar.placeholder {
-            display: flex;
+        .author-avatar.error {
+            display: none;
+        }
+
+        .author-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--water-blue));
+            display: none;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            color: var(--primary);
-            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            font-weight: 700;
+            border: 2px solid var(--water-light);
+        }
+
+        .author-avatar.error + .author-placeholder {
+            display: flex;
         }
 
         .author-details {
@@ -446,25 +441,40 @@
         }
 
         .author-name {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--primary);
             font-weight: 600;
             display: block;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin-bottom: 0.2rem;
+        }
+
+        .author-description {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+            margin-bottom: 0.3rem;
         }
 
         .author-followers {
             font-size: 0.7rem;
             color: var(--text-gray);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
         }
 
         .tags {
             display: flex;
             flex-wrap: wrap;
             gap: 0.4rem;
-            margin-top: 0.7rem;
+            margin-top: 0.8rem;
         }
 
         .tag {
@@ -476,6 +486,7 @@
             font-weight: 500;
             border: 1px solid rgba(0, 180, 216, 0.2);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .tag:active {
@@ -521,7 +532,7 @@
         /* 加载更多 */
         .load-more {
             text-align: center;
-            margin: 2rem auto;
+            margin: 2rem auto 3rem;
             padding: 0 2rem;
         }
 
@@ -581,10 +592,8 @@
             font-size: 1.1rem;
             font-weight: 700;
             flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
             margin-right: 1rem;
+            line-height: 1.4;
         }
 
         .modal-close {
@@ -635,7 +644,7 @@
 
         .modal-actions {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 0.8rem;
             margin-bottom: 1.5rem;
         }
@@ -650,10 +659,11 @@
             font-weight: 600;
             transition: all 0.3s ease;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
+            gap: 0.3rem;
+            font-size: 0.85rem;
         }
 
         .modal-action-btn:active {
@@ -666,6 +676,10 @@
             border: none;
         }
 
+        .modal-action-btn .icon {
+            font-size: 1.3rem;
+        }
+
         .info-section {
             margin-bottom: 1.3rem;
         }
@@ -675,14 +689,21 @@
             color: var(--text-gray);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.5rem;
             font-weight: 600;
         }
 
         .info-content {
             font-size: 0.95rem;
             color: var(--text-dark);
-            line-height: 1.5;
+            line-height: 1.6;
+        }
+
+        .modal-author-card {
+            background: linear-gradient(135deg, rgba(0, 180, 216, 0.05), rgba(173, 232, 244, 0.05));
+            padding: 1rem;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 180, 216, 0.2);
         }
 
         /* 空状态 */
@@ -739,76 +760,26 @@
 
         /* 移动端优化 */
         @media (max-width: 767px) {
-            .navbar-desktop {
-                display: none;
-            }
-
-            .navbar-mobile {
-                display: block;
-            }
-
-            .control-panel {
-                margin: 1rem auto;
-                padding: 0 1rem;
-            }
-
-            .search-section {
-                padding: 1rem;
-            }
-
-            .search-box {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                padding: 0.9rem;
-            }
-
-            .filters {
-                flex-direction: column;
-            }
-
-            .filter-group {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .filter-select {
-                flex: 1;
-            }
-
-            .view-toggle {
-                width: 100%;
-                margin-left: 0;
-                justify-content: center;
-            }
-
-            .gallery {
-                padding: 0 1rem;
-                gap: 1rem;
-                grid-template-columns: 1fr !important;
-            }
-
-            .quick-actions {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            .modal-image-container {
-                min-height: 250px;
-            }
+            .navbar-desktop { display: none; }
+            .navbar-mobile { display: block; }
+            .control-panel { margin: 1rem auto; padding: 0 1rem; }
+            .search-section { padding: 1rem; }
+            .search-box { flex-direction: column; }
+            .btn { width: 100%; padding: 0.9rem; }
+            .filters { flex-direction: column; }
+            .filter-group { width: 100%; justify-content: space-between; }
+            .filter-select { flex: 1; }
+            .gallery { padding: 0 1rem; gap: 1rem; grid-template-columns: 1fr !important; }
+            .quick-actions { opacity: 1; transform: translateY(0); }
+            .modal-image-container { min-height: 250px; }
+            .modal-actions { grid-template-columns: 1fr 1fr; }
+            .modal-action-btn:last-child { grid-column: 1 / -1; }
         }
 
         /* PC端优化 */
         @media (min-width: 768px) {
-            .navbar-desktop {
-                display: flex;
-            }
-
-            .navbar-mobile {
-                display: none;
-            }
+            .navbar-desktop { display: flex; }
+            .navbar-mobile { display: none; }
 
             .gallery-item:hover {
                 transform: translateY(-5px);
@@ -824,10 +795,6 @@
                 box-shadow: 0 6px 20px var(--shadow-hover);
             }
 
-            .load-more-btn:hover {
-                transform: translateY(-3px);
-            }
-
             .tag:hover {
                 background: var(--water-blue);
                 color: white;
@@ -838,19 +805,6 @@
                 transform: scale(1.1);
                 background: var(--water-blue);
                 color: white;
-            }
-
-            .action-btn.liked:hover {
-                background: #ff5252;
-            }
-
-            .modal-action-btn:hover {
-                background: var(--water-blue);
-                color: white;
-            }
-
-            .modal-action-btn.primary:hover {
-                opacity: 0.9;
             }
 
             .modal-content {
@@ -872,7 +826,7 @@
             }
 
             .modal-info {
-                width: 350px;
+                width: 380px;
                 border-left: 1px solid rgba(0, 180, 216, 0.1);
                 overflow-y: auto;
                 max-height: 80vh;
@@ -952,7 +906,7 @@
         <div class="search-section">
             <div class="search-box">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" id="searchInput" placeholder="搜索标题、作者、标签...">
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索标题、作者、标签、简介...">
                 <button class="btn" onclick="searchImages()">搜索</button>
                 <button class="btn btn-secondary" onclick="clearSearch()">清除</button>
             </div>
@@ -965,21 +919,17 @@
                         <option value="favorites">最多喜欢</option>
                         <option value="comments">最多评论</option>
                         <option value="newest">最新发布</option>
+                        <option value="followers">粉丝最多</option>
                     </select>
                 </div>
 
                 <div class="filter-group">
-                    <span class="filter-label">数量</span>
+                    <span class="filter-label">每页</span>
                     <select class="filter-select" id="limitSelect" onchange="applyFilters()">
-                        <option value="20">20张/页</option>
-                        <option value="40">40张/页</option>
-                        <option value="60">60张/页</option>
+                        <option value="20">20张</option>
+                        <option value="40">40张</option>
+                        <option value="60">60张</option>
                     </select>
-                </div>
-
-                <div class="view-toggle">
-                    <button class="view-btn active" onclick="changeView('grid')" title="网格">⊞</button>
-                    <button class="view-btn" onclick="changeView('list')" title="列表">☰</button>
                 </div>
             </div>
         </div>
@@ -1006,12 +956,12 @@
 
     <!-- 加载更多 -->
     <div class="load-more" id="loadMoreSection" style="display: none;">
-        <button class="load-more-btn" onclick="loadMore()">加载更多</button>
+        <button class="load-more-btn" onclick="loadMore()">加载更多精彩内容</button>
     </div>
 
     <!-- 模态框 -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
+    <div id="modal" class="modal" onclick="closeModalOnBackdrop(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">图片详情</h2>
                 <button class="modal-close" onclick="closeModal()">×</button>
@@ -1023,35 +973,43 @@
                 <div class="modal-info">
                     <div class="modal-actions">
                         <button class="modal-action-btn primary" onclick="downloadImage()">
-                            <span>⬇️</span>
+                            <span class="icon">⬇️</span>
                             <span>下载</span>
                         </button>
                         <button class="modal-action-btn" onclick="toggleLikeModal()">
-                            <span id="modalLikeIcon">♡</span>
+                            <span class="icon" id="modalLikeIcon">♡</span>
                             <span>收藏</span>
+                        </button>
+                        <button class="modal-action-btn" onclick="openOriginalUrl()">
+                            <span class="icon">🔗</span>
+                            <span>原网页</span>
                         </button>
                     </div>
 
                     <div class="info-section">
-                        <div class="info-label">标题</div>
+                        <div class="info-label">图片标题</div>
                         <div class="info-content" id="modalInfoTitle">-</div>
                     </div>
 
                     <div class="info-section">
-                        <div class="info-label">作者</div>
-                        <div class="author-info" id="modalAuthor"></div>
+                        <div class="info-label">作者信息</div>
+                        <div class="modal-author-card">
+                            <div class="author-info" id="modalAuthor" style="border: none; padding: 0;"></div>
+                        </div>
                     </div>
 
                     <div class="info-section">
                         <div class="info-label">互动数据</div>
-                        <div class="item-stats">
+                        <div class="item-stats" style="font-size: 1rem;">
                             <span class="stat">
                                 <span>❤️</span>
                                 <span id="modalFavorites">0</span>
+                                <span style="font-size: 0.8rem; color: var(--text-gray);">喜欢</span>
                             </span>
                             <span class="stat">
                                 <span>💬</span>
                                 <span id="modalComments">0</span>
+                                <span style="font-size: 0.8rem; color: var(--text-gray);">评论</span>
                             </span>
                         </div>
                     </div>
@@ -1062,8 +1020,13 @@
                     </div>
 
                     <div class="info-section" id="modalTagsSection">
-                        <div class="info-label">标签</div>
+                        <div class="info-label">相关标签</div>
                         <div class="tags" id="modalTags"></div>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-label">图片ID</div>
+                        <div class="info-content" id="modalImgId" style="font-family: monospace; font-size: 0.85rem; color: var(--text-gray);">-</div>
                     </div>
                 </div>
             </div>
@@ -1082,8 +1045,8 @@
         let currentPage = 1;
         let itemsPerPage = 20;
         let likedImages = new Set(JSON.parse(localStorage.getItem('likedImages') || '[]'));
-        let currentImageUrl = '';
         let currentImageData = null;
+        let lastPostId = null;
 
         // 加载数据
         async function loadData() {
@@ -1091,20 +1054,67 @@
                 const response = await fetch('https://api.tuchong.com/feed-app');
                 const data = await response.json();
 
+                console.log('API返回数据:', data);
+
                 if (data && data.feedList) {
                     allData = data.feedList.filter(item => 
                         item.images && item.images.length > 0
                     );
+
+                    // 保存最后一个post_id用于翻页
+                    if (allData.length > 0) {
+                        lastPostId = allData[allData.length - 1].post_id;
+                    }
+
                     filteredData = [...allData];
                     applyFilters();
                     document.getElementById('loading').style.display = 'none';
+
+                    console.log('成功加载', allData.length, '张图片');
                 } else {
                     showError('未找到图片数据');
                 }
             } catch (error) {
                 showError('加载失败，请检查网络');
-                console.error('Error:', error);
+                console.error('加载错误:', error);
             }
+        }
+
+        // 构建图片URL
+        function buildImageUrl(item) {
+            if (!item.images || !item.images[0]) return '';
+            const img = item.images[0];
+            return `https://photo.tuchong.com/${img.user_id}/f/${img.img_id}.jpg`;
+        }
+
+        // 构建头像URL
+        function buildAvatarUrl(icon) {
+            if (!icon) return '';
+            // 处理不同格式的头像路径
+            if (icon.startsWith('http')) {
+                return icon;
+            } else if (icon.startsWith('//')) {
+                return 'https:' + icon;
+            } else {
+                return `https://photo.tuchong.com/${icon}`;
+            }
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            if (!dateString) return '未知';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (days === 0) return '今天';
+            if (days === 1) return '昨天';
+            if (days < 7) return `${days}天前`;
+            if (days < 30) return `${Math.floor(days / 7)}周前`;
+            if (days < 365) return `${Math.floor(days / 30)}个月前`;
+
+            return date.toLocaleDateString('zh-CN');
         }
 
         // 显示图片
@@ -1128,37 +1138,42 @@
             document.getElementById('emptyState').style.display = 'none';
 
             itemsToDisplay.forEach((item, index) => {
-                const imageUrl = `https://photo.tuchong.com/${item.images[0].user_id}/f/${item.images[0].img_id}.jpg`;
+                const imageUrl = buildImageUrl(item);
                 const title = item.title || '无标题';
                 const favorites = item.favorites || 0;
                 const comments = item.comments || 0;
-                const author = item.site ? item.site.name : '未知';
+                const author = item.site ? item.site.name : '未知作者';
+                const authorIcon = item.site && item.site.icon ? buildAvatarUrl(item.site.icon) : '';
+                const authorDesc = item.site && item.site.description ? item.site.description : '';
                 const followers = item.site && item.site.followers ? item.site.followers : 0;
                 const tags = item.tags || [];
                 const postId = item.post_id;
+                const publishDate = formatDate(item.published_at);
                 const isLiked = likedImages.has(postId);
 
-                // 获取作者头像或首字母
-                let authorAvatarHtml = '';
-                if (item.site && item.site.icon) {
-                    authorAvatarHtml = `<img src="https://s1.tuchong.com/${item.site.icon}" alt="${author}" class="author-avatar" onerror="this.outerHTML='<div class=\'author-avatar placeholder\'>${author.charAt(0).toUpperCase()}</div>'">`;
-                } else {
-                    authorAvatarHtml = `<div class="author-avatar placeholder">${author.charAt(0).toUpperCase()}</div>`;
-                }
+                // 生成头像HTML
+                const authorFirstLetter = author.charAt(0).toUpperCase();
+                const avatarHtml = authorIcon ? 
+                    `<img src="${authorIcon}" alt="${author}" class="author-avatar" onerror="this.className='author-avatar error'">
+                     <div class="author-placeholder">${authorFirstLetter}</div>` :
+                    `<div class="author-placeholder" style="display: flex;">${authorFirstLetter}</div>`;
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'gallery-item';
                 itemDiv.style.animationDelay = `${(index % 20) * 0.03}s`;
 
                 itemDiv.innerHTML = `
-                    <div class="img-container">
-                        <img src="${imageUrl}" alt="${title}" onclick="openModal(${JSON.stringify(item).replace(/"/g, '&quot;')})" loading="lazy">
+                    <div class="img-container" onclick='openModal(${JSON.stringify(item).replace(/'/g, "\'")}); event.stopPropagation();'>
+                        <img src="${imageUrl}" alt="${title}" loading="lazy">
                         <div class="quick-actions">
                             <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(event, '${postId}')" title="收藏">
                                 ${isLiked ? '❤️' : '♡'}
                             </button>
-                            <button class="action-btn" onclick="quickDownload(event, '${imageUrl}', '${title.replace(/'/g, "\'")}')">
+                            <button class="action-btn" onclick="quickDownload(event, '${imageUrl}', '${title.replace(/'/g, "\'")}', '${item.images[0].img_id}')" title="下载">
                                 ⬇️
+                            </button>
+                            <button class="action-btn" onclick='openUrl(event, "${item.url}")' title="查看原网页">
+                                🔗
                             </button>
                         </div>
                     </div>
@@ -1169,17 +1184,21 @@
                                 <span class="stat">❤️ ${favorites.toLocaleString()}</span>
                                 <span class="stat">💬 ${comments.toLocaleString()}</span>
                             </div>
+                            <div class="item-date">${publishDate}</div>
                         </div>
                         ${tags.length > 0 ? `
                         <div class="tags">
-                            ${tags.slice(0, 3).map(tag => `<span class="tag" onclick="searchByTag(event, '${tag}')">#${tag}</span>`).join('')}
+                            ${tags.slice(0, 4).map(tag => `<span class="tag" onclick="searchByTag(event, '${tag}')">#${tag}</span>`).join('')}
                         </div>
                         ` : ''}
                         <div class="author-info">
-                            ${authorAvatarHtml}
+                            <div class="author-avatar-wrapper">
+                                ${avatarHtml}
+                            </div>
                             <div class="author-details">
-                                <span class="author-name">${author}</span>
-                                <span class="author-followers">${followers.toLocaleString()} 粉丝</span>
+                                <span class="author-name" onclick='openUrl(event, "${item.site ? item.site.url : ''}")'>${author}</span>
+                                ${authorDesc ? `<div class="author-description">${authorDesc}</div>` : ''}
+                                <div class="author-followers">👥 ${followers.toLocaleString()} 粉丝</div>
                             </div>
                         </div>
                     </div>
@@ -1207,10 +1226,12 @@
                 filteredData = allData.filter(item => {
                     const title = (item.title || '').toLowerCase();
                     const author = item.site ? (item.site.name || '').toLowerCase() : '';
+                    const description = item.site ? (item.site.description || '').toLowerCase() : '';
                     const tags = item.tags ? item.tags.join(' ').toLowerCase() : '';
 
                     return title.includes(searchTerm) || 
                            author.includes(searchTerm) || 
+                           description.includes(searchTerm) ||
                            tags.includes(searchTerm);
                 });
             }
@@ -1252,6 +1273,13 @@
                 case 'newest':
                     filteredData.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
                     break;
+                case 'followers':
+                    filteredData.sort((a, b) => {
+                        const aFollowers = a.site && a.site.followers ? a.site.followers : 0;
+                        const bFollowers = b.site && b.site.followers ? b.site.followers : 0;
+                        return bFollowers - aFollowers;
+                    });
+                    break;
             }
 
             itemsPerPage = parseInt(limit);
@@ -1273,19 +1301,23 @@
         function loadMore() {
             currentPage++;
             displayImages();
-        }
 
-        // 切换视图
-        function changeView(view) {
-            const buttons = document.querySelectorAll('.view-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            // 平滑滚动
+            setTimeout(() => {
+                const newItems = document.querySelectorAll('.gallery-item');
+                if (newItems.length > (currentPage - 1) * itemsPerPage) {
+                    newItems[(currentPage - 1) * itemsPerPage].scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+            }, 100);
         }
 
         // 收藏
         function toggleLike(event, postId) {
             event.stopPropagation();
-            const btn = event.target.closest('.action-btn');
+            const btn = event.currentTarget;
 
             if (likedImages.has(postId)) {
                 likedImages.delete(postId);
@@ -1304,67 +1336,82 @@
         }
 
         // 快速下载
-        function quickDownload(event, imageUrl, title) {
+        function quickDownload(event, imageUrl, title, imgId) {
             event.stopPropagation();
-            downloadImageFile(imageUrl, title);
+            const filename = title || `image_${imgId}`;
+            downloadImageFile(imageUrl, filename);
+        }
+
+        // 打开URL
+        function openUrl(event, url) {
+            event.stopPropagation();
+            if (url) {
+                window.open(url, '_blank', 'noopener,noreferrer');
+            }
         }
 
         // 打开模态框
         function openModal(item) {
             const modal = document.getElementById('modal');
             const modalImg = document.getElementById('modalImg');
-            const imageUrl = `https://photo.tuchong.com/${item.images[0].user_id}/f/${item.images[0].img_id}.jpg`;
+            const imageUrl = buildImageUrl(item);
 
-            currentImageUrl = imageUrl;
             currentImageData = item;
 
             modal.style.display = 'block';
             modalImg.src = imageUrl;
 
-            document.getElementById('modalTitle').textContent = item.title || '无标题';
-            document.getElementById('modalInfoTitle').textContent = item.title || '无标题';
+            // 标题
+            const title = item.title || '无标题';
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalInfoTitle').textContent = title;
+
+            // 互动数据
             document.getElementById('modalFavorites').textContent = (item.favorites || 0).toLocaleString();
             document.getElementById('modalComments').textContent = (item.comments || 0).toLocaleString();
 
-            if (item.published_at) {
-                const date = new Date(item.published_at);
-                document.getElementById('modalDate').textContent = date.toLocaleString('zh-CN');
+            // 日期
+            document.getElementById('modalDate').textContent = formatDate(item.published_at);
+
+            // 图片ID
+            if (item.images && item.images[0]) {
+                document.getElementById('modalImgId').textContent = item.images[0].img_id;
             }
 
             // 作者信息
-            const author = item.site ? item.site.name : '未知';
+            const author = item.site ? item.site.name : '未知作者';
+            const authorIcon = item.site && item.site.icon ? buildAvatarUrl(item.site.icon) : '';
+            const authorDesc = item.site && item.site.description ? item.site.description : '暂无简介';
             const followers = item.site && item.site.followers ? item.site.followers : 0;
-            let authorHtml = '';
+            const authorFirstLetter = author.charAt(0).toUpperCase();
 
-            if (item.site && item.site.icon) {
-                authorHtml = `
-                    <img src="https://s1.tuchong.com/${item.site.icon}" alt="${author}" class="author-avatar" onerror="this.outerHTML='<div class=\'author-avatar placeholder\'>${author.charAt(0).toUpperCase()}</div>'">
-                    <div class="author-details">
-                        <span class="author-name">${author}</span>
-                        <span class="author-followers">${followers.toLocaleString()} 粉丝</span>
-                    </div>
-                `;
-            } else {
-                authorHtml = `
-                    <div class="author-avatar placeholder">${author.charAt(0).toUpperCase()}</div>
-                    <div class="author-details">
-                        <span class="author-name">${author}</span>
-                        <span class="author-followers">${followers.toLocaleString()} 粉丝</span>
-                    </div>
-                `;
-            }
-            document.getElementById('modalAuthor').innerHTML = authorHtml;
+            const avatarHtml = authorIcon ? 
+                `<img src="${authorIcon}" alt="${author}" class="author-avatar" onerror="this.className='author-avatar error'">
+                 <div class="author-placeholder">${authorFirstLetter}</div>` :
+                `<div class="author-placeholder" style="display: flex;">${authorFirstLetter}</div>`;
+
+            document.getElementById('modalAuthor').innerHTML = `
+                <div class="author-avatar-wrapper">
+                    ${avatarHtml}
+                </div>
+                <div class="author-details">
+                    <span class="author-name">${author}</span>
+                    <div class="author-description">${authorDesc}</div>
+                    <div class="author-followers">👥 ${followers.toLocaleString()} 粉丝</div>
+                </div>
+            `;
 
             // 标签
             if (item.tags && item.tags.length > 0) {
                 document.getElementById('modalTagsSection').style.display = 'block';
                 document.getElementById('modalTags').innerHTML = item.tags.map(tag => 
-                    `<span class="tag" onclick="searchByTag(event, '${tag}')">#${tag}</span>`
+                    `<span class="tag" onclick="searchByTag(event, '${tag}'); closeModal();">#${tag}</span>`
                 ).join('');
             } else {
                 document.getElementById('modalTagsSection').style.display = 'none';
             }
 
+            // 收藏按钮状态
             const isLiked = likedImages.has(item.post_id);
             document.getElementById('modalLikeIcon').textContent = isLiked ? '❤️' : '♡';
 
@@ -1375,6 +1422,13 @@
         function closeModal() {
             document.getElementById('modal').style.display = 'none';
             document.body.style.overflow = 'auto';
+        }
+
+        // 点击背景关闭
+        function closeModalOnBackdrop(event) {
+            if (event.target.id === 'modal') {
+                closeModal();
+            }
         }
 
         // 模态框收藏
@@ -1396,20 +1450,45 @@
 
             localStorage.setItem('likedImages', JSON.stringify([...likedImages]));
             updateStats();
+
+            // 更新画廊中的按钮
+            const galleryBtns = document.querySelectorAll(`[onclick*="${postId}"]`);
+            galleryBtns.forEach(btn => {
+                if (btn.classList.contains('action-btn')) {
+                    if (likedImages.has(postId)) {
+                        btn.classList.add('liked');
+                        btn.innerHTML = '❤️';
+                    } else {
+                        btn.classList.remove('liked');
+                        btn.innerHTML = '♡';
+                    }
+                }
+            });
+        }
+
+        // 打开原网页
+        function openOriginalUrl() {
+            if (currentImageData && currentImageData.url) {
+                window.open(currentImageData.url, '_blank', 'noopener,noreferrer');
+                showToast('已在新窗口打开');
+            } else {
+                showToast('暂无原网页链接');
+            }
         }
 
         // 下载图片
         function downloadImage() {
-            if (!currentImageUrl || !currentImageData) return;
+            if (!currentImageData) return;
+            const imageUrl = buildImageUrl(currentImageData);
             const title = currentImageData.title || 'image';
-            downloadImageFile(currentImageUrl, title);
+            const imgId = currentImageData.images[0].img_id;
+            downloadImageFile(imageUrl, `${title}_${imgId}`);
         }
 
-        // 下载文件 - 修复版
+        // 下载文件
         function downloadImageFile(url, filename) {
-            showToast('开始下载图片...');
+            showToast('开始下载...');
 
-            // 方法1: 直接使用a标签下载
             const link = document.createElement('a');
             link.href = url;
             link.download = `${filename}.jpg`;
@@ -1419,10 +1498,9 @@
             link.click();
             document.body.removeChild(link);
 
-            // 延迟提示，因为可能会被浏览器阻止
             setTimeout(() => {
                 showToast('如未开始下载，请长按图片保存');
-            }, 1000);
+            }, 1500);
         }
 
         // 更新统计
