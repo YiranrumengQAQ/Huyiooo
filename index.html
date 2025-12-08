@@ -3,38 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="每日灵感文字盲盒，随机获取励志句子、情话、日记等内容">
-    <title>文字盲盒 | 每日灵感</title>
-    
-    <!-- 预连接API域名，提升性能 -->
-    <link rel="preconnect" href="https://api.ahfi.cn">
-    <link rel="dns-prefetch" href="https://api.ahfi.cn">
-    
-    <!-- 引入 Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    
+    <title>图片加密</title>
     <style>
-        /* ========== CSS变量定义 ========== */
-        :root {
-            --primary-color: #6a11cb;
-            --secondary-color: #2575fc;
-            --text-color: #333;
-            --text-secondary: #666;
-            --text-light: #999;
-            
-            /* 玻璃态效果优化 */
-            --glass-bg: rgba(255, 255, 255, 0.25);
-            --glass-border: rgba(255, 255, 255, 0.18);
-            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            --backdrop-blur: 16px;
-            
-            /* 动画时长 */
-            --transition-fast: 0.2s;
-            --transition-normal: 0.3s;
-            --transition-slow: 0.5s;
-        }
-
-        /* ========== 全局样式 ========== */
         * {
             margin: 0;
             padding: 0;
@@ -42,754 +12,306 @@
         }
 
         body {
-            font-family: 'Poppins', 'Noto Serif SC', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 100%);
-            background-size: 400% 400%;
-            animation: gradientFlow 20s ease infinite;
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #fff;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .controls {
+            background-color: #fff;
+            margin-top: 10px;
+            padding: 15px;
+        }
+
+        .control-item {
             display: flex;
-            justify-content: center;
             align-items: center;
-            color: var(--text-color);
-            padding: 20px;
-            line-height: 1.6;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
         }
 
-        /* 背景渐变动画 */
-        @keyframes gradientFlow {
-            0%, 100% { background-position: 0% 50%; }
-            25% { background-position: 50% 50%; }
-            50% { background-position: 100% 50%; }
-            75% { background-position: 50% 100%; }
+        .control-item:last-child {
+            border-bottom: none;
         }
 
-        /* ========== 主容器 ========== */
-        .container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--backdrop-blur));
-            -webkit-backdrop-filter: blur(var(--backdrop-blur));
-            border-radius: 24px;
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            padding: 45px 40px;
-            width: 100%;
-            max-width: 650px;
-            text-align: center;
-            transition: transform var(--transition-normal) ease,
-                        box-shadow var(--transition-normal) ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity var(--transition-slow);
-            pointer-events: none;
-        }
-
-        .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.45);
-        }
-
-        .container:hover::before {
-            opacity: 1;
-        }
-
-        /* ========== 标题 ========== */
-        h1 {
-            font-size: 1.4rem;
-            color: var(--text-secondary);
-            margin-bottom: 30px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            font-weight: 600;
-            position: relative;
-            display: inline-block;
-        }
-
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            border-radius: 2px;
-        }
-
-        /* ========== 下拉菜单 ========== */
-        .select-wrapper {
-            position: relative;
-            margin-bottom: 35px;
-            display: inline-block;
-            width: 100%;
-            max-width: 280px;
-        }
-
-        .select-wrapper::after {
-            content: '▼';
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            transition: transform var(--transition-fast);
-        }
-
-        .select-wrapper:hover::after {
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            width: 100%;
-            padding: 13px 45px 13px 20px;
-            font-size: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.4);
-            color: var(--text-color);
-            font-family: inherit;
-            font-weight: 500;
-            cursor: pointer;
-            outline: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all var(--transition-normal) ease;
-        }
-
-        select:hover {
-            background: rgba(255, 255, 255, 0.6);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-        }
-
-        select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.15);
-        }
-
-        /* ========== 引用文本区域 ========== */
-        .quote-box {
-            margin-bottom: 40px;
-            position: relative;
-            cursor: pointer;
-            padding: 30px 25px;
-            border-radius: 16px;
-            transition: background var(--transition-normal);
-            min-height: 150px;
+        .control-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            isolation: isolate;
-        }
-        
-        .quote-box:hover {
-            background: rgba(255, 255, 255, 0.3);
         }
 
-        .quote-box:active {
-            transform: scale(0.98);
+        .control-icon.blue { background-color: #4A90E2; }
+        .control-icon.orange { background-color: #FF9500; }
+        .control-icon.green { background-color: #4CD964; }
+        .control-icon.red { background-color: #FF3B30; }
+
+        .control-text {
+            flex: 1;
         }
 
-        .quote-icon {
-            font-size: 5rem;
-            color: rgba(106, 17, 203, 0.08);
-            position: absolute;
-            top: -15px;
-            left: 15px;
-            font-family: Georgia, serif;
-            pointer-events: none;
-            user-select: none;
-            z-index: -1;
+        .control-title {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 2px;
         }
 
-        .quote-content {
-            font-size: 1.5rem;
-            line-height: 1.8;
-            font-weight: 700;
-            color: #2c3e50;
-            opacity: 0;
-            transform: translateY(15px) scale(0.95);
-            transition: opacity var(--transition-slow) ease,
-                        transform var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
-            max-width: 100%;
-            word-wrap: break-word;
-            text-align: center;
-        }
-        
-        .quote-content.show {
-            opacity: 1;
-            transform: translateY(0) scale(1);
+        .control-desc {
+            font-size: 12px;
+            color: #999;
         }
 
-        .loading-text {
-            font-size: 1rem;
-            color: var(--text-light);
-            font-style: italic;
-            font-weight: 400;
-        }
-
-        .error-text {
-            font-size: 0.95rem;
-            color: #e74c3c;
-            font-weight: 500;
-        }
-
-        .error-text small {
-            display: block;
-            margin-top: 8px;
-            font-size: 0.8rem;
-            color: var(--text-light);
-        }
-
-        /* ========== 按钮样式 ========== */
-        .btn {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            border: none;
-            padding: 14px 45px;
-            font-size: 1.05rem;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
-            transition: all var(--transition-normal) cubic-bezier(0.34, 1.56, 0.64, 1);
-            font-family: inherit;
-            font-weight: 600;
-            letter-spacing: 1px;
+        .switch {
             position: relative;
-            overflow: hidden;
+            width: 51px;
+            height: 31px;
         }
 
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
+        .switch input {
+            opacity: 0;
             width: 0;
             height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 27px;
+            width: 27px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(106, 17, 203, 0.4);
+        input:checked + .slider {
+            background-color: #4CD964;
         }
 
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
+        input:checked + .slider:before {
+            transform: translateX(20px);
         }
 
-        .btn:active {
-            transform: translateY(-1px);
+        .encrypted-image {
+            width: 100%;
+            margin-top: 10px;
+            background-color: #fff;
         }
 
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        #canvas {
+            width: 100%;
+            display: block;
         }
 
-        .btn:disabled:hover {
-            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+        .file-input-wrapper {
+            margin: 15px;
         }
 
-        /* ========== Toast提示框 ========== */
-        .toast {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%) translateY(120px);
-            background: rgba(0, 0, 0, 0.88);
-            color: white;
-            padding: 14px 28px;
-            border-radius: 50px;
-            font-size: 0.95rem;
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            z-index: 1000;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(8px);
-            white-space: nowrap;
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .toast::before {
-            content: '✨';
-            margin-right: 8px;
-            font-size: 1.1rem;
-        }
-
-        /* ========== 加载动画 ========== */
-        .loading-spinner {
+        .file-input-btn {
             display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            vertical-align: middle;
-            margin-left: 8px;
+            padding: 10px 20px;
+            background-color: #4A90E2;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* ========== 响应式设计 ========== */
-        @media (max-width: 768px) {
-            .container {
-                padding: 35px 25px;
-                max-width: 95%;
-            }
-            
-            h1 {
-                font-size: 1.1rem;
-                letter-spacing: 2px;
-            }
-            
-            .quote-content {
-                font-size: 1.3rem;
-                line-height: 1.7;
-            }
-            
-            .quote-icon {
-                font-size: 4rem;
-            }
-            
-            .btn {
-                padding: 12px 35px;
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 15px;
-            }
-            
-            .container {
-                padding: 25px 20px;
-            }
-            
-            h1 {
-                font-size: 1rem;
-                margin-bottom: 25px;
-            }
-            
-            .select-wrapper {
-                max-width: 100%;
-            }
-            
-            .quote-content {
-                font-size: 1.2rem;
-            }
-            
-            .quote-box {
-                min-height: 120px;
-                padding: 25px 15px;
-            }
-        }
-
-        /* ========== 深色模式支持 ========== */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --text-color: #e0e0e0;
-                --text-secondary: #b0b0b0;
-            }
-            
-            .quote-content {
-                color: #ecf0f1;
-            }
-        }
-
-        /* ========== 无障碍优化 ========== */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* ========== 打印样式 ========== */
-        @media print {
-            body {
-                background: white;
-            }
-            
-            .container {
-                box-shadow: none;
-                border: 1px solid #ddd;
-            }
-            
-            .btn, .select-wrapper {
-                display: none;
-            }
+        #fileInput {
+            display: none;
         }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <h1>文字盲盒</h1>
-        
-        <!-- 类型选择器 -->
-        <div class="select-wrapper">
-            <select id="type-select" aria-label="选择文本类型">
-                <option value="Sentences">每日一句</option>
-                <option value="TianGou">舔狗日记</option>
-                <option value="LoveWords">土味情话</option>
-                <option value="KFCV50">疯狂星期四</option>
-                <option value="MeiJuZhaiChao">美句摘抄</option>
-                <option value="GoodNight">晚安语录</option>
-                <option value="Morning">早安语录</option>
-                <option value="TongJinCheng">佟金城语录</option>
-            </select>
-        </div>
-
-        <!-- 文本显示区域 -->
-        <div class="quote-box" id="quote-box" title="点击复制内容" role="button" tabindex="0" aria-live="polite">
-            <span class="quote-icon" aria-hidden="true">"</span>
-            <div class="quote-content" id="quote-text">
-                <span class="loading-text">点击下方按钮开始...</span>
-            </div>
-        </div>
-        
-        <button class="btn" id="new-quote-btn" aria-label="获取新的随机文本">
-            <span id="btn-text">换一句</span>
-        </button>
+    <div class="header">
+        <h1>图片加密</h1>
+        <p>选择图片后，将显示加密效果。您可以控制加密强度。</p>
     </div>
 
-    <!-- Toast提示 -->
-    <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+    <div class="file-input-wrapper">
+        <label for="fileInput" class="file-input-btn">选择图片</label>
+        <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="controls">
+        <div class="control-item">
+            <div class="control-icon blue"></div>
+            <div class="control-text">
+                <div class="control-title">像素密度</div>
+                <div class="control-desc">控制加密像素的大小（1-20像素）</div>
+            </div>
+            <input type="range" id="pixelSize" min="1" max="20" value="3" style="width: 100px;">
+        </div>
+
+        <div class="control-item">
+            <div class="control-icon orange"></div>
+            <div class="control-text">
+                <div class="control-title">随机度</div>
+                <div class="control-desc">控制颜色随机化程度（0-100%）</div>
+            </div>
+            <input type="range" id="randomness" min="0" max="100" value="50" style="width: 100px;">
+        </div>
+
+        <div class="control-item">
+            <div class="control-icon green"></div>
+            <div class="control-text">
+                <div class="control-title">色彩混淆</div>
+                <div class="control-desc">启用随机彩色像素效果</div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="colorConfusion" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="control-item">
+            <div class="control-icon red"></div>
+            <div class="control-text">
+                <div class="control-title">隐私模式</div>
+                <div class="control-desc">完全随机化所有像素</div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="privacyMode">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="encrypted-image">
+        <canvas id="canvas"></canvas>
+    </div>
 
     <script>
-        'use strict';
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('fileInput');
+        const pixelSizeInput = document.getElementById('pixelSize');
+        const randomnessInput = document.getElementById('randomness');
+        const colorConfusionInput = document.getElementById('colorConfusion');
+        const privacyModeInput = document.getElementById('privacyMode');
 
-        // ========== DOM 元素引用 ==========
-        const elements = {
-            quoteText: document.getElementById('quote-text'),
-            quoteBox: document.getElementById('quote-box'),
-            newQuoteBtn: document.getElementById('new-quote-btn'),
-            btnText: document.getElementById('btn-text'),
-            typeSelect: document.getElementById('type-select'),
-            toast: document.getElementById('toast')
-        };
+        let currentImage = null;
 
-        // ========== 配置常量 ==========
-        const CONFIG = {
-            apiBaseUrl: 'https://api.ahfi.cn/api/randomText',
-            requestTimeout: 10000, // 10秒超时
-            toastDuration: 2000,
-            animationDelay: 250
-        };
-
-        // ========== 工具函数 ==========
-        const Utils = {
-            // 延迟函数
-            delay: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
-
-            // 带超时的 fetch
-            fetchWithTimeout: async (url, timeout = CONFIG.requestTimeout) => {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), timeout);
-                
-                try {
-                    const response = await fetch(url, { 
-                        signal: controller.signal,
-                        cache: 'no-cache'
-                    });
-                    clearTimeout(timeoutId);
-                    return response;
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    throw error;
-                }
-            },
-
-            // 清理文本
-            sanitizeText: (text) => {
-                if (!text) return '';
-                return text
-                    .toString()
-                    .trim()
-                    .replace(/<script\b[^<]*(?:(?!</script>)<[^<]*)*</script>/gi, '')
-                    .replace(/[<>]/g, (match) => match === '<' ? '&lt;' : '&gt;');
-            },
-
-            // 显示Toast
-            showToast: (message, duration = CONFIG.toastDuration) => {
-                elements.toast.textContent = message;
-                elements.toast.classList.add('show');
-                setTimeout(() => {
-                    elements.toast.classList.remove('show');
-                }, duration);
-            }
-        };
-
-        // ========== API 调用 ==========
-        const API = {
-            // 获取随机文本
-            fetchQuote: async (type) => {
-                const url = `${CONFIG.apiBaseUrl}?type=${encodeURIComponent(type)}`;
-                
-                try {
-                    const response = await Utils.fetchWithTimeout(url);
-                    
-                    // 检查 HTTP 状态
-                    if (!response.ok) {
-                        if (response.status === 404) throw new Error('接口不存在 (404)');
-                        if (response.status === 500) throw new Error('服务器错误 (500)');
-                        if (response.status === 429) throw new Error('请求过于频繁，请稍后再试');
-                        throw new Error(`请求失败 (${response.status})`);
-                    }
-
-                    // 获取内容类型
-                    const contentType = response.headers.get('content-type') || '';
-                    let textContent = '';
-
-                    // 根据内容类型解析
-                    if (contentType.includes('application/json')) {
-                        const data = await response.json();
-                        textContent = API.parseJsonResponse(data);
-                    } else {
-                        // 纯文本响应
-                        textContent = await response.text();
-                    }
-
-                    // 验证和清理文本
-                    textContent = Utils.sanitizeText(textContent);
-                    
-                    if (!textContent || textContent === 'null' || textContent === 'undefined') {
-                        throw new Error('返回内容为空');
-                    }
-
-                    return textContent;
-
-                } catch (error) {
-                    console.error('API请求失败:', error);
-                    
-                    if (error.name === 'AbortError') {
-                        throw new Error('请求超时，请检查网络连接');
-                    }
-                    
-                    throw error;
-                }
-            },
-
-            // 解析 JSON 响应
-            parseJsonResponse: (data) => {
-                // 尝试多种可能的字段名
-                const possibleFields = [
-                    'text', 'content', 'data', 'msg', 'message', 
-                    'result', 'sentence', 'word', 'quote'
-                ];
-
-                // 直接字段查找
-                for (const field of possibleFields) {
-                    if (data[field] && typeof data[field] === 'string') {
-                        return data[field];
-                    }
-                }
-
-                // 嵌套对象查找
-                if (data.data && typeof data.data === 'object') {
-                    for (const field of possibleFields) {
-                        if (data.data[field] && typeof data.data[field] === 'string') {
-                            return data.data[field];
-                        }
-                    }
-                }
-
-                // 如果整个响应是字符串
-                if (typeof data === 'string') {
-                    return data;
-                }
-
-                return '';
-            }
-        };
-
-        // ========== UI 控制 ==========
-        const UI = {
-            // 设置加载状态
-            setLoading: (isLoading) => {
-                elements.newQuoteBtn.disabled = isLoading;
-                
-                if (isLoading) {
-                    elements.btnText.innerHTML = '加载中<span class="loading-spinner"></span>';
-                    elements.quoteText.classList.remove('show');
-                } else {
-                    elements.btnText.textContent = '换一句';
-                }
-            },
-
-            // 显示文本内容
-            showContent: async (text) => {
-                await Utils.delay(CONFIG.animationDelay);
-                elements.quoteText.innerHTML = text;
-                elements.quoteText.classList.add('show');
-            },
-
-            // 显示错误信息
-            showError: (message, details = '') => {
-                const errorHtml = `
-                    <span class="error-text">
-                        ${message}
-                        ${details ? `<small>${details}</small>` : ''}
-                    </span>
-                `;
-                elements.quoteText.innerHTML = errorHtml;
-                elements.quoteText.classList.add('show');
-            }
-        };
-
-        // ========== 主要功能 ==========
-        const App = {
-            // 获取并显示引用文本
-            fetchAndDisplay: async () => {
-                const selectedType = elements.typeSelect.value;
-                
-                UI.setLoading(true);
-
-                try {
-                    const text = await API.fetchQuote(selectedType);
-                    await UI.showContent(text);
-                } catch (error) {
-                    console.error('获取文本失败:', error);
-                    UI.showError(
-                        '😕 获取失败',
-                        error.message || '请检查网络连接后重试'
-                    );
-                } finally {
-                    UI.setLoading(false);
-                }
-            },
-
-            // 复制到剪贴板
-            copyToClipboard: async () => {
-                const text = elements.quoteText.innerText;
-                
-                // 验证文本有效性
-                if (!text || 
-                    text.includes('加载中') || 
-                    text.includes('点击下方') || 
-                    text.includes('获取失败')) {
-                    return;
-                }
-
-                try {
-                    // 现代浏览器方法
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        await navigator.clipboard.writeText(text);
-                        Utils.showToast('已复制到剪贴板');
-                    } else {
-                        // 备用方法
-                        App.fallbackCopy(text);
-                    }
-                } catch (error) {
-                    console.error('复制失败:', error);
-                    App.fallbackCopy(text);
-                }
-            },
-
-            // 备用复制方法
-            fallbackCopy: (text) => {
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                textArea.setAttribute('readonly', '');
-                document.body.appendChild(textArea);
-                
-                try {
-                    textArea.select();
-                    textArea.setSelectionRange(0, 99999); // 移动端兼容
-                    
-                    const successful = document.execCommand('copy');
-                    if (successful) {
-                        Utils.showToast('已复制到剪贴板');
-                    } else {
-                        Utils.showToast('复制失败，请手动复制');
-                    }
-                } catch (error) {
-                    console.error('备用复制失败:', error);
-                    Utils.showToast('复制失败，请手动复制');
-                } finally {
-                    document.body.removeChild(textArea);
-                }
-            },
-
-            // 初始化事件监听
-            initEventListeners: () => {
-                // 按钮点击
-                elements.newQuoteBtn.addEventListener('click', App.fetchAndDisplay);
-
-                // 复制区域点击
-                elements.quoteBox.addEventListener('click', App.copyToClipboard);
-
-                // 键盘支持（Enter和Space键）
-                elements.quoteBox.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        App.copyToClipboard();
-                    }
-                });
-
-                // 类型切换自动刷新
-                elements.typeSelect.addEventListener('change', App.fetchAndDisplay);
-
-                // 键盘快捷键支持
-                document.addEventListener('keydown', (e) => {
-                    // Ctrl/Cmd + R 刷新
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-                        e.preventDefault();
-                        App.fetchAndDisplay();
-                    }
-                });
-            },
-
-            // 初始化应用
-            init: () => {
-                App.initEventListeners();
-                App.fetchAndDisplay(); // 自动加载第一条
-                console.log('✨ 文字盲盒已启动');
-            }
-        };
-
-        // ========== 应用启动 ==========
-        // 确保 DOM 完全加载后再初始化
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', App.init);
-        } else {
-            App.init();
+        // 生成随机颜色
+        function randomColor() {
+            return `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
         }
 
+        // 加密图片
+        function encryptImage() {
+            if (!currentImage) {
+                // 如果没有图片，显示默认的随机像素效果
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                const pixelSize = parseInt(pixelSizeInput.value);
+
+                for (let y = 0; y < canvas.height; y += pixelSize) {
+                    for (let x = 0; x < canvas.width; x += pixelSize) {
+                        ctx.fillStyle = randomColor();
+                        ctx.fillRect(x, y, pixelSize, pixelSize);
+                    }
+                }
+                return;
+            }
+
+            const pixelSize = parseInt(pixelSizeInput.value);
+            const randomness = parseInt(randomnessInput.value);
+            const colorConfusion = colorConfusionInput.checked;
+            const privacyMode = privacyModeInput.checked;
+
+            canvas.width = currentImage.width;
+            canvas.height = currentImage.height;
+
+            // 先绘制原图
+            ctx.drawImage(currentImage, 0, 0);
+
+            // 获取图片数据
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            // 加密处理
+            for (let y = 0; y < canvas.height; y += pixelSize) {
+                for (let x = 0; x < canvas.width; x += pixelSize) {
+                    let color;
+
+                    if (privacyMode) {
+                        // 完全随机化
+                        color = randomColor();
+                    } else if (colorConfusion && Math.random() * 100 < randomness) {
+                        // 根据随机度混淆颜色
+                        color = randomColor();
+                    } else {
+                        // 使用原图颜色的像素化版本
+                        const pixelIndex = (y * canvas.width + x) * 4;
+                        const r = data[pixelIndex];
+                        const g = data[pixelIndex + 1];
+                        const b = data[pixelIndex + 2];
+                        color = `rgb(${r}, ${g}, ${b})`;
+                    }
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x, y, pixelSize, pixelSize);
+                }
+            }
+        }
+
+        // 文件选择事件
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        currentImage = img;
+                        encryptImage();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 控制项变化事件
+        pixelSizeInput.addEventListener('input', encryptImage);
+        randomnessInput.addEventListener('input', encryptImage);
+        colorConfusionInput.addEventListener('change', encryptImage);
+        privacyModeInput.addEventListener('change', encryptImage);
+
+        // 初始化显示随机像素效果
+        encryptImage();
     </script>
 </body>
 </html>
