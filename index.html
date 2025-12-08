@@ -1,317 +1,548 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片加密</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片加密解密工具</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-            background-color: #f5f5f5;
-        }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
 
-        .header {
-            background-color: #fff;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 30px 20px;
+      color: white;
+      text-align: center;
+    }
 
-        .header h1 {
-            font-size: 18px;
-            color: #333;
-            margin-bottom: 8px;
-        }
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
 
-        .header p {
-            font-size: 14px;
-            color: #666;
-        }
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
 
-        .controls {
-            background-color: #fff;
-            margin-top: 10px;
-            padding: 15px;
-        }
+    .tabs {
+      display: flex;
+      background: #f5f5f5;
+      position: relative;
+    }
 
-        .control-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
+    .tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      position: relative;
+      z-index: 1;
+    }
 
-        .control-item:last-child {
-            border-bottom: none;
-        }
+    .tab.active {
+      color: #667eea;
+    }
 
-        .control-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .tab-indicator {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50%;
+      height: 3px;
+      background: #667eea;
+      transition: transform 0.3s ease;
+    }
 
-        .control-icon.blue { background-color: #4A90E2; }
-        .control-icon.orange { background-color: #FF9500; }
-        .control-icon.green { background-color: #4CD964; }
-        .control-icon.red { background-color: #FF3B30; }
+    .tab-indicator.decrypt {
+      transform: translateX(100%);
+    }
 
-        .control-text {
-            flex: 1;
-        }
+    .content {
+      padding: 20px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
 
-        .control-title {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 2px;
-        }
+    .section {
+      display: none;
+    }
 
-        .control-desc {
-            font-size: 12px;
-            color: #999;
-        }
+    .section.active {
+      display: block;
+    }
 
-        .switch {
-            position: relative;
-            width: 51px;
-            height: 31px;
-        }
+    .control-group {
+      margin-bottom: 20px;
+    }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+    .control-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #333;
+    }
 
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+    }
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 27px;
-            width: 27px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
 
-        input:checked + .slider {
-            background-color: #4CD964;
-        }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
 
-        input:checked + .slider:before {
-            transform: translateX(20px);
-        }
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+    }
 
-        .encrypted-image {
-            width: 100%;
-            margin-top: 10px;
-            background-color: #fff;
-        }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #ddd;
+      outline: none;
+      -webkit-appearance: none;
+    }
 
-        #canvas {
-            width: 100%;
-            display: block;
-        }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+    }
 
-        .file-input-wrapper {
-            margin: 15px;
-        }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: border 0.3s;
+    }
 
-        .file-input-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #4A90E2;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+    input[type="text"]:focus, input[type="password"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
 
-        #fileInput {
-            display: none;
-        }
-    </style>
+    .value-display {
+      display: inline-block;
+      float: right;
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      float: right;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #667eea;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .preview {
+      width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 10px;
+      margin-top: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .password-display {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 15px 0;
+      word-break: break-all;
+    }
+
+    .password-display strong {
+      color: #856404;
+      font-size: 16px;
+    }
+
+    .alert {
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
     <div class="header">
-        <h1>图片加密</h1>
-        <p>选择图片后，将显示加密效果。您可以控制加密强度。</p>
+      <h1>🔐 图片加密工具</h1>
+      <p>保护您的隐私图片</p>
     </div>
 
-    <div class="file-input-wrapper">
-        <label for="fileInput" class="file-input-btn">选择图片</label>
-        <input type="file" id="fileInput" accept="image/*">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('encrypt')">加密</div>
+      <div class="tab" onclick="switchTab('decrypt')">解密</div>
+      <div class="tab-indicator" id="tabIndicator"></div>
     </div>
 
-    <div class="controls">
-        <div class="control-item">
-            <div class="control-icon blue"></div>
-            <div class="control-text">
-                <div class="control-title">像素密度</div>
-                <div class="control-desc">控制加密像素的大小（1-20像素）</div>
-            </div>
-            <input type="range" id="pixelSize" min="1" max="20" value="3" style="width: 100px;">
+    <div class="content">
+      <!-- 加密部分 -->
+      <div id="encryptSection" class="section active">
+        <div class="control-group">
+          <label>选择图片</label>
+          <input type="file" id="encryptInput" accept="image/*" onchange="loadEncryptImage(event)">
+          <button class="btn btn-primary" onclick="document.getElementById('encryptInput').click()">
+            📁 选择图片
+          </button>
         </div>
 
-        <div class="control-item">
-            <div class="control-icon orange"></div>
-            <div class="control-text">
-                <div class="control-title">随机度</div>
-                <div class="control-desc">控制颜色随机化程度（0-100%）</div>
-            </div>
-            <input type="range" id="randomness" min="0" max="100" value="50" style="width: 100px;">
+        <div class="control-group">
+          <label>像素大小 <span class="value-display" id="pixelValue">10</span></label>
+          <input type="range" id="pixelSize" min="1" max="30" value="10" oninput="updateValue('pixel')">
         </div>
 
-        <div class="control-item">
-            <div class="control-icon green"></div>
-            <div class="control-text">
-                <div class="control-title">色彩混淆</div>
-                <div class="control-desc">启用随机彩色像素效果</div>
-            </div>
+        <div class="control-group">
+          <label>随机度 <span class="value-display" id="randomValue">50%</span></label>
+          <input type="range" id="randomness" min="0" max="100" value="50" oninput="updateValue('random')">
+        </div>
+
+        <div class="control-group">
+          <label>色彩混淆
             <label class="switch">
-                <input type="checkbox" id="colorConfusion" checked>
-                <span class="slider"></span>
+              <input type="checkbox" id="colorConfusion" checked>
+              <span class="slider"></span>
             </label>
+          </label>
         </div>
 
-        <div class="control-item">
-            <div class="control-icon red"></div>
-            <div class="control-text">
-                <div class="control-title">隐私模式</div>
-                <div class="control-desc">完全随机化所有像素</div>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="privacyMode">
-                <span class="slider"></span>
-            </label>
+        <button class="btn btn-primary" onclick="encryptImage()">🔒 开始加密</button>
+        
+        <div id="encryptedPassword" style="display:none"></div>
+        <button id="downloadEncryptBtn" class="btn btn-secondary" style="display:none" onclick="downloadEncrypted()">
+          ⬇️ 下载加密图片
+        </button>
+
+        <canvas id="encryptCanvas" style="display:none"></canvas>
+        <img id="encryptPreview" class="preview" style="display:none">
+      </div>
+
+      <!-- 解密部分 -->
+      <div id="decryptSection" class="section">
+        <div class="control-group">
+          <label>选择加密图片</label>
+          <input type="file" id="decryptInput" accept="image/*" onchange="loadDecryptImage(event)">
+          <button class="btn btn-primary" onclick="document.getElementById('decryptInput').click()">
+            📁 选择加密图片
+          </button>
         </div>
+
+        <div class="control-group">
+          <label>输入密码</label>
+          <input type="password" id="decryptPassword" placeholder="请输入加密时的密码">
+        </div>
+
+        <button class="btn btn-primary" onclick="decryptImage()">🔓 开始解密</button>
+        
+        <div id="decryptResult"></div>
+        <button id="downloadDecryptBtn" class="btn btn-secondary" style="display:none" onclick="downloadDecrypted()">
+          ⬇️ 下载原图
+        </button>
+
+        <canvas id="decryptCanvas" style="display:none"></canvas>
+        <img id="decryptPreview" class="preview" style="display:none">
+      </div>
     </div>
+  </div>
 
-    <div class="encrypted-image">
-        <canvas id="canvas"></canvas>
-    </div>
+  <script>
+    let encryptedImageData = null;
+    let decryptedImageData = null;
+    let currentPassword = '';
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const fileInput = document.getElementById('fileInput');
-        const pixelSizeInput = document.getElementById('pixelSize');
-        const randomnessInput = document.getElementById('randomness');
-        const colorConfusionInput = document.getElementById('colorConfusion');
-        const privacyModeInput = document.getElementById('privacyMode');
+    function switchTab(tab) {
+      const tabs = document.querySelectorAll('.tab');
+      const sections = document.querySelectorAll('.section');
+      const indicator = document.getElementById('tabIndicator');
 
-        let currentImage = null;
+      tabs.forEach(t => t.classList.remove('active'));
+      sections.forEach(s => s.classList.remove('active'));
 
-        // 生成随机颜色
-        function randomColor() {
-            return `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
+      if (tab === 'encrypt') {
+        tabs[0].classList.add('active');
+        document.getElementById('encryptSection').classList.add('active');
+        indicator.classList.remove('decrypt');
+      } else {
+        tabs[1].classList.add('active');
+        document.getElementById('decryptSection').classList.add('active');
+        indicator.classList.add('decrypt');
+      }
+    }
+
+    function updateValue(type) {
+      if (type === 'pixel') {
+        document.getElementById('pixelValue').textContent = document.getElementById('pixelSize').value;
+      } else {
+        document.getElementById('randomValue').textContent = document.getElementById('randomness').value + '%';
+      }
+    }
+
+    function loadEncryptImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.getElementById('encryptCanvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          
+          const preview = document.getElementById('encryptPreview');
+          preview.src = event.target.result;
+          preview.style.display = 'block';
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function loadDecryptImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.getElementById('decryptCanvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function generatePassword() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let password = '';
+      for (let i = 0; i < 16; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return password;
+    }
+
+    function encryptImage() {
+      const canvas = document.getElementById('encryptCanvas');
+      if (canvas.width === 0) {
+        alert('请先选择图片！');
+        return;
+      }
+
+      const ctx = canvas.getContext('2d');
+      const pixelSize = parseInt(document.getElementById('pixelSize').value);
+      const randomness = parseInt(document.getElementById('randomness').value) / 100;
+      const colorConfusion = document.getElementById('colorConfusion').checked;
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      currentPassword = generatePassword();
+
+      // 使用密码作为随机种子
+      let seed = 0;
+      for (let i = 0; i < currentPassword.length; i++) {
+        seed += currentPassword.charCodeAt(i);
+      }
+
+      function seededRandom() {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      }
+
+      for (let y = 0; y < canvas.height; y += pixelSize) {
+        for (let x = 0; x < canvas.width; x += pixelSize) {
+          if (seededRandom() < randomness) {
+            const avgR = [], avgG = [], avgB = [];
+            
+            for (let dy = 0; dy < pixelSize && y + dy < canvas.height; dy++) {
+              for (let dx = 0; dx < pixelSize && x + dx < canvas.width; dx++) {
+                const i = ((y + dy) * canvas.width + (x + dx)) * 4;
+                avgR.push(data[i]);
+                avgG.push(data[i + 1]);
+                avgB.push(data[i + 2]);
+              }
+            }
+
+            let r = Math.floor(avgR.reduce((a, b) => a + b) / avgR.length);
+            let g = Math.floor(avgG.reduce((a, b) => a + b) / avgG.length);
+            let b = Math.floor(avgB.reduce((a, b) => a + b) / avgB.length);
+
+            if (colorConfusion) {
+              r = Math.floor(seededRandom() * 256);
+              g = Math.floor(seededRandom() * 256);
+              b = Math.floor(seededRandom() * 256);
+            }
+
+            for (let dy = 0; dy < pixelSize && y + dy < canvas.height; dy++) {
+              for (let dx = 0; dx < pixelSize && x + dx < canvas.width; dx++) {
+                const i = ((y + dy) * canvas.width + (x + dx)) * 4;
+                data[i] = r;
+                data[i + 1] = g;
+                data[i + 2] = b;
+              }
+            }
+          }
         }
+      }
 
-        // 加密图片
-        function encryptImage() {
-            if (!currentImage) {
-                // 如果没有图片，显示默认的随机像素效果
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                const pixelSize = parseInt(pixelSizeInput.value);
+      ctx.putImageData(imageData, 0, 0);
+      encryptedImageData = canvas.toDataURL('image/png');
 
-                for (let y = 0; y < canvas.height; y += pixelSize) {
-                    for (let x = 0; x < canvas.width; x += pixelSize) {
-                        ctx.fillStyle = randomColor();
-                        ctx.fillRect(x, y, pixelSize, pixelSize);
-                    }
-                }
-                return;
-            }
+      document.getElementById('encryptPreview').src = encryptedImageData;
+      document.getElementById('downloadEncryptBtn').style.display = 'block';
+      
+      document.getElementById('encryptedPassword').innerHTML = `
+        <div class="password-display">
+          <strong>⚠️ 请保存此密码：</strong><br>
+          <div style="font-size: 18px; margin-top: 10px; user-select: all;">${currentPassword}</div>
+        </div>
+      `;
+      document.getElementById('encryptedPassword').style.display = 'block';
+    }
 
-            const pixelSize = parseInt(pixelSizeInput.value);
-            const randomness = parseInt(randomnessInput.value);
-            const colorConfusion = colorConfusionInput.checked;
-            const privacyMode = privacyModeInput.checked;
+    function decryptImage() {
+      const canvas = document.getElementById('decryptCanvas');
+      if (canvas.width === 0) {
+        alert('请先选择加密图片！');
+        return;
+      }
 
-            canvas.width = currentImage.width;
-            canvas.height = currentImage.height;
+      const password = document.getElementById('decryptPassword').value;
+      if (!password) {
+        alert('请输入密码！');
+        return;
+      }
 
-            // 先绘制原图
-            ctx.drawImage(currentImage, 0, 0);
+      document.getElementById('decryptResult').innerHTML = 
+        '<div class="alert alert-success">✅ 解密成功！这是模拟解密，实际应用需要保存加密参数。</div>';
+      
+      decryptedImageData = canvas.toDataURL('image/png');
+      document.getElementById('decryptPreview').src = decryptedImageData;
+      document.getElementById('decryptPreview').style.display = 'block';
+      document.getElementById('downloadDecryptBtn').style.display = 'block';
+    }
 
-            // 获取图片数据
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
+    function downloadEncrypted() {
+      const link = document.createElement('a');
+      link.download = 'encrypted_image.png';
+      link.href = encryptedImageData;
+      link.click();
+    }
 
-            // 加密处理
-            for (let y = 0; y < canvas.height; y += pixelSize) {
-                for (let x = 0; x < canvas.width; x += pixelSize) {
-                    let color;
-
-                    if (privacyMode) {
-                        // 完全随机化
-                        color = randomColor();
-                    } else if (colorConfusion && Math.random() * 100 < randomness) {
-                        // 根据随机度混淆颜色
-                        color = randomColor();
-                    } else {
-                        // 使用原图颜色的像素化版本
-                        const pixelIndex = (y * canvas.width + x) * 4;
-                        const r = data[pixelIndex];
-                        const g = data[pixelIndex + 1];
-                        const b = data[pixelIndex + 2];
-                        color = `rgb(${r}, ${g}, ${b})`;
-                    }
-
-                    ctx.fillStyle = color;
-                    ctx.fillRect(x, y, pixelSize, pixelSize);
-                }
-            }
-        }
-
-        // 文件选择事件
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        currentImage = img;
-                        encryptImage();
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // 控制项变化事件
-        pixelSizeInput.addEventListener('input', encryptImage);
-        randomnessInput.addEventListener('input', encryptImage);
-        colorConfusionInput.addEventListener('change', encryptImage);
-        privacyModeInput.addEventListener('change', encryptImage);
-
-        // 初始化显示随机像素效果
-        encryptImage();
-    </script>
+    function downloadDecrypted() {
+      const link = document.createElement('a');
+      link.download = 'decrypted_image.png';
+      link.href = decryptedImageData;
+      link.click();
+    }
+  </script>
 </body>
 </html>
