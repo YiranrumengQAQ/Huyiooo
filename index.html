@@ -1,426 +1,354 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <title>QQ 头像高清获取</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
-                   "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
-      background: linear-gradient(135deg, #1f2933, #111827);
-      color: #e5e7eb;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .container {
-      width: 100%;
-      max-width: 480px;
-      background: rgba(15, 23, 42, 0.92);
-      border-radius: 18px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
-      padding: 26px 22px 20px;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      backdrop-filter: blur(16px);
-    }
-    .header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 22px;
-    }
-    .logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 14px;
-      background: radial-gradient(circle at 25% 20%, #60a5fa, #1d4ed8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #eff6ff;
-      font-weight: 700;
-      font-size: 20px;
-      margin-right: 14px;
-      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
-    }
-    .title-block h1 {
-      font-size: 18px;
-      margin-bottom: 4px;
-      color: #f9fafb;
-    }
-    .title-block p {
-      font-size: 12px;
-      color: #9ca3af;
-    }
-    .form-group {
-      margin-bottom: 18px;
-    }
-    .label-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 6px;
-    }
-    .label-row label {
-      font-size: 13px;
-      color: #d1d5db;
-    }
-    .label-row span {
-      font-size: 11px;
-      color: #6b7280;
-    }
-    .input-wrap {
-      position: relative;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px 82px 10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      background: radial-gradient(circle at 0 0, rgba(148, 163, 184, 0.18), rgba(15, 23, 42, 0.95));
-      color: #e5e7eb;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-    }
-    input[type="text"]::placeholder {
-      color: #6b7280;
-    }
-    input[type="text"]:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.55);
-      background: radial-gradient(circle at 0 0, rgba(129, 140, 248, 0.18), rgba(15, 23, 42, 0.98));
-    }
-    .btn {
-      position: absolute;
-      right: 3px;
-      top: 3px;
-      bottom: 3px;
-      width: 76px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      color: #e5e7eb;
-      background: linear-gradient(135deg, #2563eb, #4f46e5);
-      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5);
-      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
-    }
-    .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 32px rgba(37, 99, 235, 0.66);
-      filter: brightness(1.05);
-    }
-    .btn:active {
-      transform: translateY(0);
-      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.6);
-      filter: brightness(0.98);
-    }
-    .btn:disabled {
-      cursor: not-allowed;
-      opacity: 0.7;
-      box-shadow: none;
-      transform: none;
-    }
-    .status {
-      min-height: 18px;
-      margin-bottom: 12px;
-      font-size: 12px;
-      color: #9ca3af;
-    }
-    .status.error {
-      color: #fca5a5;
-    }
-    .status.success {
-      color: #6ee7b7;
-    }
-    .avatar-card {
-      margin-top: 4px;
-      padding: 12px;
-      border-radius: 16px;
-      background: radial-gradient(circle at 0 0, rgba(59, 130, 246, 0.14), rgba(17, 24, 39, 0.95));
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .avatar-skeleton,
-    .avatar {
-      width: 86px;
-      height: 86px;
-      border-radius: 22px;
-      background: radial-gradient(circle at 30% 20%, #4b5563, #0f172a);
-      flex-shrink: 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .avatar-skeleton::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(120deg,
-                  rgba(31, 41, 55, 0.2),
-                  rgba(75, 85, 99, 0.55),
-                  rgba(31, 41, 55, 0.2));
-      transform: translateX(-100%);
-      animation: shimmer 1.2s infinite;
-    }
-    @keyframes shimmer {
-      100% {
-        transform: translateX(100%);
-      }
-    }
-    .avatar-info {
-      flex: 1;
-      min-width: 0;
-    }
-    .avatar-info h2 {
-      font-size: 15px;
-      color: #f9fafb;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tag {
-      font-size: 11px;
-      padding: 1px 6px;
-      border-radius: 999px;
-      background: rgba(34, 197, 94, 0.12);
-      color: #6ee7b7;
-      border: 1px solid rgba(34, 197, 94, 0.28);
-    }
-    .avatar-info p {
-      font-size: 12px;
-      color: #9ca3af;
-      margin-bottom: 8px;
-      word-break: break-all;
-    }
-    .avatar-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .link-btn {
-      font-size: 11px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(75, 85, 99, 0.9);
-      background: rgba(15, 23, 42, 0.9);
-      color: #e5e7eb;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
-    }
-    .link-btn:hover {
-      border-color: #60a5fa;
-      background: rgba(30, 64, 175, 0.9);
-    }
-    .footer {
-      margin-top: 14px;
-      font-size: 11px;
-      color: #6b7280;
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .footer span {
-      white-space: nowrap;
-    }
-    .footer a {
-      color: #9ca3af;
-      text-decoration: none;
-      border-bottom: 1px dashed rgba(148, 163, 184, 0.7);
-    }
-    .footer a:hover {
-      color: #e5e7eb;
-      border-bottom-style: solid;
-    }
-    @media (max-width: 480px) {
-      .container {
-        padding: 22px 16px 16px;
-      }
-      .avatar-card {
-        align-items: flex-start;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日灵感 | Random Text</title>
+    <!-- 引入 Google Fonts 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6a11cb;
+            --secondary-color: #2575fc;
+            --text-color: #333;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Noto Serif SC', serif;
+            background: linear-gradient(45deg, #a18cd1 0%, #fbc2eb 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* 下拉菜单样式 */
+        .select-wrapper {
+            position: relative;
+            margin-bottom: 30px;
+            display: inline-block;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 0.8rem;
+            color: #666;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 100%;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.5);
+            color: #333;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        select:hover {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        select:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* 文本显示区域 */
+        .quote-box {
+            margin-bottom: 40px;
+            position: relative;
+            cursor: pointer;
+            padding: 20px;
+            border-radius: 12px;
+            transition: background 0.3s;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quote-box:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .quote-content {
+            font-size: 1.6rem;
+            line-height: 1.6;
+            font-weight: 700;
+            color: #2c3e50;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .quote-content.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .quote-icon {
+            font-size: 4rem;
+            color: rgba(106, 17, 203, 0.1);
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            font-family: sans-serif;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            font-size: 1rem;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+            transition: all 0.3s ease;
+            font-family: inherit;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(106, 17, 203, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: wait;
+            transform: none;
+        }
+
+        /* 提示框 Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 100;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 480px) {
+            .quote-content { font-size: 1.3rem; }
+            .container { padding: 25px; width: 90%; }
+            h1 { font-size: 1rem; }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <div class="logo">Q</div>
-      <div class="title-block">
-        <h1>QQ 头像高清获取</h1>
-        <p>输入 QQ 号，一键获取你的高清 QQ 头像</p>
-      </div>
-    </header>
 
-    <div class="form-group">
-      <div class="label-row">
-        <label for="qqInput">QQ 号码</label>
-        <span>示例：1330903352</span>
-      </div>
-      <div class="input-wrap">
-        <input
-          type="text"
-          id="qqInput"
-          placeholder="请输入 QQ 号，例如：1330903352"
-          autocomplete="off"
-        />
-        <button class="btn" id="queryBtn">获取头像</button>
-      </div>
-    </div>
-
-    <div id="status" class="status"></div>
-
-    <div id="avatarSection" style="display:none;">
-      <div class="avatar-card">
-        <div class="avatar-skeleton" id="avatarSkeleton"></div>
-        <div class="avatar" id="avatarWrap" style="display:none;">
-          <img id="avatarImg" alt="QQ头像" />
+    <div class="container">
+        <h1>文字盲盒</h1>
+        
+        <!-- 类型选择器：中文显示，值传给API -->
+        <div class="select-wrapper">
+            <select id="type-select">
+                <option value="Sentences">每日一句</option>
+                <option value="TianGou">舔狗日记</option>
+                <option value="LoveWords">土味情话</option>
+                <option value="KFCV50">疯狂星期四</option>
+                <option value="MeiJuZhaiChao">美句摘抄</option>
+                <option value="GoodNight">晚安语录</option>
+                <option value="Morning">早安语录</option>
+                <option value="TongJinCheng">佟金城语录</option>
+            </select>
         </div>
-        <div class="avatar-info">
-          <h2>
-            <span id="qqText">QQ: -</span>
-            <span class="tag">高清头像</span>
-          </h2>
-          <p id="avatarUrlText"></p>
-          <div class="avatar-actions">
-            <button class="link-btn" id="openImgBtn">新窗口打开</button>
-            <button class="link-btn" id="copyLinkBtn">复制图片链接</button>
-          </div>
+
+        <div class="quote-box" id="quote-box" title="点击复制内容">
+            <span class="quote-icon">“</span>
+            <div class="quote-content" id="quote-text">
+                <span class="loading-text">点击下方按钮开始...</span>
+            </div>
         </div>
-      </div>
+        
+        <button class="btn" id="new-quote-btn">换一句</button>
     </div>
 
-    <div class="footer">
-      <span>接口：api.ahfi.cn /api/qqimg</span>
-      <span>方法：GET · 返回：JSON</span>
-    </div>
-  </div>
+    <div class="toast" id="toast">✨ 已复制到剪贴板</div>
 
-  <script>
-    const API_BASE = "https://api.ahfi.cn/api/qqimg"; // 接口地址 [web:1]
+    <script>
+        const quoteText = document.getElementById('quote-text');
+        const newQuoteBtn = document.getElementById('new-quote-btn');
+        const typeSelect = document.getElementById('type-select');
+        const quoteBox = document.getElementById('quote-box');
+        const toast = document.getElementById('toast');
 
-    const qqInput = document.getElementById("qqInput");
-    const queryBtn = document.getElementById("queryBtn");
-    const statusEl = document.getElementById("status");
-    const avatarSection = document.getElementById("avatarSection");
-    const avatarSkeleton = document.getElementById("avatarSkeleton");
-    const avatarWrap = document.getElementById("avatarWrap");
-    const avatarImg = document.getElementById("avatarImg");
-    const qqText = document.getElementById("qqText");
-    const avatarUrlText = document.getElementById("avatarUrlText");
-    const openImgBtn = document.getElementById("openImgBtn");
-    const copyLinkBtn = document.getElementById("copyLinkBtn");
+        // 基础 API 地址
+        const BASE_API_URL = 'https://api.ahfi.cn/api/randomText';
 
-    function setStatus(text, type) {
-      statusEl.textContent = text || "";
-      statusEl.className = "status" + (type ? " " + type : "");
-    }
+        async function fetchQuote() {
+            // 1. 获取用户选择的类型 (如 TianGou)
+            const selectedType = typeSelect.value;
+            
+            // 2. 拼接完整的 URL
+            // 注意：这里强制指定 format=json，因为我们需要 JSON 数据来精确提取文本
+            const targetUrl = `${BASE_API_URL}?type=${selectedType}&format=json`;
 
-    function isValidQQ(qq) {
-      return /^[1-9][0-9]{4,}$/.test(qq);
-    }
+            // UI 状态更新：加载中
+            newQuoteBtn.disabled = true;
+            newQuoteBtn.textContent = '加载中...';
+            quoteText.classList.remove('show');
+            
+            // 简单延迟，让淡出动画播完
+            await new Promise(r => setTimeout(r, 200));
 
-    async function fetchAvatar() {
-      const qq = qqInput.value.trim();
-      if (!qq) {
-        setStatus("请输入 QQ 号。", "error");
-        return;
-      }
-      if (!isValidQQ(qq)) {
-        setStatus("QQ 号格式不正确，请检查后重试。", "error");
-        return;
-      }
+            try {
+                const response = await fetch(targetUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
-      const url = API_BASE + "?qq=" + encodeURIComponent(qq);
-      queryBtn.disabled = true;
-      queryBtn.textContent = "获取中…";
-      setStatus("正在获取头像，请稍候…", "success");
+                const data = await response.json();
+                
+                // 3. 智能解析字段
+                // 不同的 type 可能返回不同的字段名，这里做一个兼容处理
+                // 通常可能是 data.text, data.content, 或者直接就是 text
+                let textContent = '';
+                
+                if (data.code === 200 || data.code === "200") {
+                     // 优先检查常见字段
+                     textContent = data.text || data.content || data.data || data.msg;
+                } else {
+                    // 如果 API 返回错误码
+                     textContent = data.msg || "获取失败，请重试";
+                }
 
-      avatarSection.style.display = "none";
-      avatarSkeleton.style.display = "block";
-      avatarWrap.style.display = "none";
+                if (!textContent && typeof data === 'string') {
+                    textContent = data;
+                }
+                
+                // 渲染文本
+                quoteText.innerHTML = textContent || "暂无内容";
+                quoteText.classList.add('show');
 
-      try {
-        const resp = await fetch(url, { method: "GET" });
-        if (!resp.ok) {
-          throw new Error("接口响应异常：" + resp.status);
-        }
-        const data = await resp.json();
-        const avatarUrl = data.头像 || data.avatar || data.img || data.url;
-
-        if (!avatarUrl) {
-          throw new Error("未获取到头像地址，请稍后重试。");
+            } catch (error) {
+                console.error('Fetch error:', error);
+                quoteText.innerText = '网络请求失败，换个类型试试？';
+                quoteText.classList.add('show');
+            } finally {
+                newQuoteBtn.disabled = false;
+                newQuoteBtn.textContent = '换一句';
+            }
         }
 
-        avatarSection.style.display = "block";
-        qqText.textContent = "QQ: " + qq;
-        avatarUrlText.textContent = avatarUrl;
+        // 复制功能
+        function copyToClipboard() {
+            const text = quoteText.innerText;
+            if (!text || text === "加载中..." || text.includes("点击下方")) return;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast();
+            }).catch(err => {
+                console.error('Copy failed', err);
+            });
+        }
 
-        const img = new Image();
-        img.src = avatarUrl;
-        img.onload = () => {
-          avatarImg.src = avatarUrl;
-          avatarSkeleton.style.display = "none";
-          avatarWrap.style.display = "block";
-        };
-        img.onerror = () => {
-          avatarSkeleton.style.display = "none";
-          setStatus("图片加载失败，请稍后重试。", "error");
-        };
+        function showToast() {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
 
-        setStatus("获取成功，可点击打开或复制链接。", "success");
-      } catch (err) {
-        setStatus(err.message || "请求失败，请稍后重试。", "error");
-      } finally {
-        queryBtn.disabled = false;
-        queryBtn.textContent = "获取头像";
-      }
-    }
+        // 绑定事件
+        newQuoteBtn.addEventListener('click', fetchQuote);
+        quoteBox.addEventListener('click', copyToClipboard);
+        
+        // 当用户切换类型时，自动刷新
+        typeSelect.addEventListener('change', fetchQuote);
 
-    queryBtn.addEventListener("click", fetchAvatar);
-    qqInput.addEventListener("keyup", (e) => {
-      if (e.key === "Enter") {
-        fetchAvatar();
-      }
-    });
-
-    openImgBtn.addEventListener("click", () => {
-      const url = avatarImg.src;
-      if (url) {
-        window.open(url, "_blank");
-      }
-    });
-
-    copyLinkBtn.addEventListener("click", async () => {
-      const url = avatarImg.src;
-      if (!url) return;
-      try {
-        await navigator.clipboard.writeText(url);
-        setStatus("图片链接已复制到剪贴板。", "success");
-      } catch {
-        setStatus("复制失败，请手动复制链接。", "error");
-      }
-    });
-  </script>
+        // 初始化：页面加载时自动获取第一条
+        fetchQuote();
+    </script>
 </body>
 </html>
