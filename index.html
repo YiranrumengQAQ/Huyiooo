@@ -3,19 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>每日灵感 | Random Text</title>
-    <!-- 引入 Google Fonts 字体 -->
+    <meta name="description" content="每日灵感文字盲盒，随机获取励志句子、情话、日记等内容">
+    <title>文字盲盒 | 每日灵感</title>
+    
+    <!-- 预连接API域名，提升性能 -->
+    <link rel="preconnect" href="https://api.ahfi.cn">
+    <link rel="dns-prefetch" href="https://api.ahfi.cn">
+    
+    <!-- 引入 Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    
     <style>
+        /* ========== CSS变量定义 ========== */
         :root {
             --primary-color: #6a11cb;
             --secondary-color: #2575fc;
             --text-color: #333;
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --text-secondary: #666;
+            --text-light: #999;
+            
+            /* 玻璃态效果优化 */
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --backdrop-blur: 16px;
+            
+            /* 动画时长 */
+            --transition-fast: 0.2s;
+            --transition-normal: 0.3s;
+            --transition-slow: 0.5s;
         }
 
+        /* ========== 全局样式 ========== */
         * {
             margin: 0;
             padding: 0;
@@ -23,193 +42,292 @@
         }
 
         body {
-            font-family: 'Poppins', 'Noto Serif SC', serif;
-            background: linear-gradient(45deg, #a18cd1 0%, #fbc2eb 100%);
+            font-family: 'Poppins', 'Noto Serif SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 100%);
             background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            animation: gradientFlow 20s ease infinite;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             color: var(--text-color);
             padding: 20px;
+            line-height: 1.6;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
+        /* 背景渐变动画 */
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 50% 50%; }
             50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            75% { background-position: 50% 100%; }
         }
 
+        /* ========== 主容器 ========== */
         .container {
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 20px;
+            backdrop-filter: blur(var(--backdrop-blur));
+            -webkit-backdrop-filter: blur(var(--backdrop-blur));
+            border-radius: 24px;
             border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow);
-            padding: 40px;
+            box-shadow: var(--glass-shadow);
+            padding: 45px 40px;
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             text-align: center;
-            transition: transform 0.3s ease;
+            transition: transform var(--transition-normal) ease,
+                        box-shadow var(--transition-normal) ease;
             position: relative;
-            z-index: 1;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity var(--transition-slow);
+            pointer-events: none;
         }
 
         .container:hover {
             transform: translateY(-5px);
+            box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.45);
         }
 
+        .container:hover::before {
+            opacity: 1;
+        }
+
+        /* ========== 标题 ========== */
         h1 {
-            font-size: 1.2rem;
-            color: #555;
-            margin-bottom: 25px;
-            letter-spacing: 2px;
+            font-size: 1.4rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            letter-spacing: 3px;
             text-transform: uppercase;
             font-weight: 600;
+            position: relative;
+            display: inline-block;
         }
 
-        /* 下拉菜单样式 */
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        /* ========== 下拉菜单 ========== */
         .select-wrapper {
             position: relative;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             display: inline-block;
             width: 100%;
-            max-width: 250px;
+            max-width: 280px;
         }
 
         .select-wrapper::after {
             content: '▼';
-            font-size: 0.8rem;
-            color: #666;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
             position: absolute;
-            right: 15px;
+            right: 18px;
             top: 50%;
             transform: translateY(-50%);
             pointer-events: none;
+            transition: transform var(--transition-fast);
+        }
+
+        .select-wrapper:hover::after {
+            transform: translateY(-50%) scale(1.1);
         }
 
         select {
             appearance: none;
             -webkit-appearance: none;
+            -moz-appearance: none;
             width: 100%;
-            padding: 10px 20px;
+            padding: 13px 45px 13px 20px;
             font-size: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 50px;
-            background: rgba(255, 255, 255, 0.5);
-            color: #333;
+            background: rgba(255, 255, 255, 0.4);
+            color: var(--text-color);
             font-family: inherit;
+            font-weight: 500;
             cursor: pointer;
             outline: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal) ease;
         }
 
         select:hover {
-            background: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.6);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
 
         select:focus {
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.15);
         }
 
-        /* 文本显示区域 */
+        /* ========== 引用文本区域 ========== */
         .quote-box {
             margin-bottom: 40px;
             position: relative;
             cursor: pointer;
-            padding: 20px;
-            border-radius: 12px;
-            transition: background 0.3s;
-            min-height: 120px;
+            padding: 30px 25px;
+            border-radius: 16px;
+            transition: background var(--transition-normal);
+            min-height: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
+            isolation: isolate;
         }
         
         .quote-box:hover {
-            background: rgba(255,255,255,0.4);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .quote-box:active {
+            transform: scale(0.98);
+        }
+
+        .quote-icon {
+            font-size: 5rem;
+            color: rgba(106, 17, 203, 0.08);
+            position: absolute;
+            top: -15px;
+            left: 15px;
+            font-family: Georgia, serif;
+            pointer-events: none;
+            user-select: none;
+            z-index: -1;
         }
 
         .quote-content {
-            font-size: 1.6rem;
-            line-height: 1.6;
+            font-size: 1.5rem;
+            line-height: 1.8;
             font-weight: 700;
             color: #2c3e50;
             opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(15px) scale(0.95);
+            transition: opacity var(--transition-slow) ease,
+                        transform var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 100%;
+            word-wrap: break-word;
+            text-align: center;
         }
         
         .quote-content.show {
             opacity: 1;
-            transform: translateY(0);
-        }
-
-        .quote-icon {
-            font-size: 4rem;
-            color: rgba(106, 17, 203, 0.1);
-            position: absolute;
-            top: -20px;
-            left: 10px;
-            font-family: sans-serif;
-            pointer-events: none;
+            transform: translateY(0) scale(1);
         }
 
         .loading-text {
             font-size: 1rem;
-            color: #888;
+            color: var(--text-light);
             font-style: italic;
+            font-weight: 400;
         }
 
-        /* 按钮样式 */
+        .error-text {
+            font-size: 0.95rem;
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
+        .error-text small {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        /* ========== 按钮样式 ========== */
         .btn {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             border: none;
-            padding: 12px 40px;
-            font-size: 1rem;
+            padding: 14px 45px;
+            font-size: 1.05rem;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal) cubic-bezier(0.34, 1.56, 0.64, 1);
             font-family: inherit;
+            font-weight: 600;
             letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(106, 17, 203, 0.4);
         }
 
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
         .btn:active {
-            transform: translateY(1px);
+            transform: translateY(-1px);
         }
 
         .btn:disabled {
-            opacity: 0.7;
-            cursor: wait;
+            opacity: 0.6;
+            cursor: not-allowed;
             transform: none;
         }
 
-        /* 提示框 Toast */
+        .btn:disabled:hover {
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+        }
+
+        /* ========== Toast提示框 ========== */
         .toast {
             position: fixed;
-            bottom: 30px;
+            bottom: 40px;
             left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(0, 0, 0, 0.85);
+            transform: translateX(-50%) translateY(120px);
+            background: rgba(0, 0, 0, 0.88);
             color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
+            padding: 14px 28px;
+            border-radius: 50px;
             font-size: 0.95rem;
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            z-index: 100;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            white-space: nowrap;
         }
 
         .toast.show {
@@ -217,10 +335,121 @@
             opacity: 1;
         }
 
+        .toast::before {
+            content: '✨';
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* ========== 加载动画 ========== */
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== 响应式设计 ========== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 35px 25px;
+                max-width: 95%;
+            }
+            
+            h1 {
+                font-size: 1.1rem;
+                letter-spacing: 2px;
+            }
+            
+            .quote-content {
+                font-size: 1.3rem;
+                line-height: 1.7;
+            }
+            
+            .quote-icon {
+                font-size: 4rem;
+            }
+            
+            .btn {
+                padding: 12px 35px;
+                font-size: 1rem;
+            }
+        }
+
         @media (max-width: 480px) {
-            .quote-content { font-size: 1.3rem; }
-            .container { padding: 25px; width: 90%; }
-            h1 { font-size: 1rem; }
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 25px 20px;
+            }
+            
+            h1 {
+                font-size: 1rem;
+                margin-bottom: 25px;
+            }
+            
+            .select-wrapper {
+                max-width: 100%;
+            }
+            
+            .quote-content {
+                font-size: 1.2rem;
+            }
+            
+            .quote-box {
+                min-height: 120px;
+                padding: 25px 15px;
+            }
+        }
+
+        /* ========== 深色模式支持 ========== */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-color: #e0e0e0;
+                --text-secondary: #b0b0b0;
+            }
+            
+            .quote-content {
+                color: #ecf0f1;
+            }
+        }
+
+        /* ========== 无障碍优化 ========== */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ========== 打印样式 ========== */
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            
+            .btn, .select-wrapper {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -229,9 +458,9 @@
     <div class="container">
         <h1>文字盲盒</h1>
         
-        <!-- 类型选择器：中文显示，值传给API -->
+        <!-- 类型选择器 -->
         <div class="select-wrapper">
-            <select id="type-select">
+            <select id="type-select" aria-label="选择文本类型">
                 <option value="Sentences">每日一句</option>
                 <option value="TianGou">舔狗日记</option>
                 <option value="LoveWords">土味情话</option>
@@ -243,112 +472,324 @@
             </select>
         </div>
 
-        <div class="quote-box" id="quote-box" title="点击复制内容">
-            <span class="quote-icon">“</span>
+        <!-- 文本显示区域 -->
+        <div class="quote-box" id="quote-box" title="点击复制内容" role="button" tabindex="0" aria-live="polite">
+            <span class="quote-icon" aria-hidden="true">"</span>
             <div class="quote-content" id="quote-text">
                 <span class="loading-text">点击下方按钮开始...</span>
             </div>
         </div>
         
-        <button class="btn" id="new-quote-btn">换一句</button>
+        <button class="btn" id="new-quote-btn" aria-label="获取新的随机文本">
+            <span id="btn-text">换一句</span>
+        </button>
     </div>
 
-    <div class="toast" id="toast">✨ 已复制到剪贴板</div>
+    <!-- Toast提示 -->
+    <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
 
     <script>
-        const quoteText = document.getElementById('quote-text');
-        const newQuoteBtn = document.getElementById('new-quote-btn');
-        const typeSelect = document.getElementById('type-select');
-        const quoteBox = document.getElementById('quote-box');
-        const toast = document.getElementById('toast');
+        'use strict';
 
-        // 基础 API 地址
-        const BASE_API_URL = 'https://api.ahfi.cn/api/randomText';
+        // ========== DOM 元素引用 ==========
+        const elements = {
+            quoteText: document.getElementById('quote-text'),
+            quoteBox: document.getElementById('quote-box'),
+            newQuoteBtn: document.getElementById('new-quote-btn'),
+            btnText: document.getElementById('btn-text'),
+            typeSelect: document.getElementById('type-select'),
+            toast: document.getElementById('toast')
+        };
 
-        async function fetchQuote() {
-            // 1. 获取用户选择的类型 (如 TianGou)
-            const selectedType = typeSelect.value;
-            
-            // 2. 拼接完整的 URL
-            // 注意：这里强制指定 format=json，因为我们需要 JSON 数据来精确提取文本
-            const targetUrl = `${BASE_API_URL}?type=${selectedType}&format=json`;
+        // ========== 配置常量 ==========
+        const CONFIG = {
+            apiBaseUrl: 'https://api.ahfi.cn/api/randomText',
+            requestTimeout: 10000, // 10秒超时
+            toastDuration: 2000,
+            animationDelay: 250
+        };
 
-            // UI 状态更新：加载中
-            newQuoteBtn.disabled = true;
-            newQuoteBtn.textContent = '加载中...';
-            quoteText.classList.remove('show');
-            
-            // 简单延迟，让淡出动画播完
-            await new Promise(r => setTimeout(r, 200));
+        // ========== 工具函数 ==========
+        const Utils = {
+            // 延迟函数
+            delay: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
 
-            try {
-                const response = await fetch(targetUrl);
+            // 带超时的 fetch
+            fetchWithTimeout: async (url, timeout = CONFIG.requestTimeout) => {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                try {
+                    const response = await fetch(url, { 
+                        signal: controller.signal,
+                        cache: 'no-cache'
+                    });
+                    clearTimeout(timeoutId);
+                    return response;
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    throw error;
                 }
+            },
 
-                const data = await response.json();
-                
-                // 3. 智能解析字段
-                // 不同的 type 可能返回不同的字段名，这里做一个兼容处理
-                // 通常可能是 data.text, data.content, 或者直接就是 text
-                let textContent = '';
-                
-                if (data.code === 200 || data.code === "200") {
-                     // 优先检查常见字段
-                     textContent = data.text || data.content || data.data || data.msg;
-                } else {
-                    // 如果 API 返回错误码
-                     textContent = data.msg || "获取失败，请重试";
-                }
+            // 清理文本
+            sanitizeText: (text) => {
+                if (!text) return '';
+                return text
+                    .toString()
+                    .trim()
+                    .replace(/<script\b[^<]*(?:(?!</script>)<[^<]*)*</script>/gi, '')
+                    .replace(/[<>]/g, (match) => match === '<' ? '&lt;' : '&gt;');
+            },
 
-                if (!textContent && typeof data === 'string') {
-                    textContent = data;
-                }
-                
-                // 渲染文本
-                quoteText.innerHTML = textContent || "暂无内容";
-                quoteText.classList.add('show');
-
-            } catch (error) {
-                console.error('Fetch error:', error);
-                quoteText.innerText = '网络请求失败，换个类型试试？';
-                quoteText.classList.add('show');
-            } finally {
-                newQuoteBtn.disabled = false;
-                newQuoteBtn.textContent = '换一句';
+            // 显示Toast
+            showToast: (message, duration = CONFIG.toastDuration) => {
+                elements.toast.textContent = message;
+                elements.toast.classList.add('show');
+                setTimeout(() => {
+                    elements.toast.classList.remove('show');
+                }, duration);
             }
+        };
+
+        // ========== API 调用 ==========
+        const API = {
+            // 获取随机文本
+            fetchQuote: async (type) => {
+                const url = `${CONFIG.apiBaseUrl}?type=${encodeURIComponent(type)}`;
+                
+                try {
+                    const response = await Utils.fetchWithTimeout(url);
+                    
+                    // 检查 HTTP 状态
+                    if (!response.ok) {
+                        if (response.status === 404) throw new Error('接口不存在 (404)');
+                        if (response.status === 500) throw new Error('服务器错误 (500)');
+                        if (response.status === 429) throw new Error('请求过于频繁，请稍后再试');
+                        throw new Error(`请求失败 (${response.status})`);
+                    }
+
+                    // 获取内容类型
+                    const contentType = response.headers.get('content-type') || '';
+                    let textContent = '';
+
+                    // 根据内容类型解析
+                    if (contentType.includes('application/json')) {
+                        const data = await response.json();
+                        textContent = API.parseJsonResponse(data);
+                    } else {
+                        // 纯文本响应
+                        textContent = await response.text();
+                    }
+
+                    // 验证和清理文本
+                    textContent = Utils.sanitizeText(textContent);
+                    
+                    if (!textContent || textContent === 'null' || textContent === 'undefined') {
+                        throw new Error('返回内容为空');
+                    }
+
+                    return textContent;
+
+                } catch (error) {
+                    console.error('API请求失败:', error);
+                    
+                    if (error.name === 'AbortError') {
+                        throw new Error('请求超时，请检查网络连接');
+                    }
+                    
+                    throw error;
+                }
+            },
+
+            // 解析 JSON 响应
+            parseJsonResponse: (data) => {
+                // 尝试多种可能的字段名
+                const possibleFields = [
+                    'text', 'content', 'data', 'msg', 'message', 
+                    'result', 'sentence', 'word', 'quote'
+                ];
+
+                // 直接字段查找
+                for (const field of possibleFields) {
+                    if (data[field] && typeof data[field] === 'string') {
+                        return data[field];
+                    }
+                }
+
+                // 嵌套对象查找
+                if (data.data && typeof data.data === 'object') {
+                    for (const field of possibleFields) {
+                        if (data.data[field] && typeof data.data[field] === 'string') {
+                            return data.data[field];
+                        }
+                    }
+                }
+
+                // 如果整个响应是字符串
+                if (typeof data === 'string') {
+                    return data;
+                }
+
+                return '';
+            }
+        };
+
+        // ========== UI 控制 ==========
+        const UI = {
+            // 设置加载状态
+            setLoading: (isLoading) => {
+                elements.newQuoteBtn.disabled = isLoading;
+                
+                if (isLoading) {
+                    elements.btnText.innerHTML = '加载中<span class="loading-spinner"></span>';
+                    elements.quoteText.classList.remove('show');
+                } else {
+                    elements.btnText.textContent = '换一句';
+                }
+            },
+
+            // 显示文本内容
+            showContent: async (text) => {
+                await Utils.delay(CONFIG.animationDelay);
+                elements.quoteText.innerHTML = text;
+                elements.quoteText.classList.add('show');
+            },
+
+            // 显示错误信息
+            showError: (message, details = '') => {
+                const errorHtml = `
+                    <span class="error-text">
+                        ${message}
+                        ${details ? `<small>${details}</small>` : ''}
+                    </span>
+                `;
+                elements.quoteText.innerHTML = errorHtml;
+                elements.quoteText.classList.add('show');
+            }
+        };
+
+        // ========== 主要功能 ==========
+        const App = {
+            // 获取并显示引用文本
+            fetchAndDisplay: async () => {
+                const selectedType = elements.typeSelect.value;
+                
+                UI.setLoading(true);
+
+                try {
+                    const text = await API.fetchQuote(selectedType);
+                    await UI.showContent(text);
+                } catch (error) {
+                    console.error('获取文本失败:', error);
+                    UI.showError(
+                        '😕 获取失败',
+                        error.message || '请检查网络连接后重试'
+                    );
+                } finally {
+                    UI.setLoading(false);
+                }
+            },
+
+            // 复制到剪贴板
+            copyToClipboard: async () => {
+                const text = elements.quoteText.innerText;
+                
+                // 验证文本有效性
+                if (!text || 
+                    text.includes('加载中') || 
+                    text.includes('点击下方') || 
+                    text.includes('获取失败')) {
+                    return;
+                }
+
+                try {
+                    // 现代浏览器方法
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(text);
+                        Utils.showToast('已复制到剪贴板');
+                    } else {
+                        // 备用方法
+                        App.fallbackCopy(text);
+                    }
+                } catch (error) {
+                    console.error('复制失败:', error);
+                    App.fallbackCopy(text);
+                }
+            },
+
+            // 备用复制方法
+            fallbackCopy: (text) => {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.setAttribute('readonly', '');
+                document.body.appendChild(textArea);
+                
+                try {
+                    textArea.select();
+                    textArea.setSelectionRange(0, 99999); // 移动端兼容
+                    
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        Utils.showToast('已复制到剪贴板');
+                    } else {
+                        Utils.showToast('复制失败，请手动复制');
+                    }
+                } catch (error) {
+                    console.error('备用复制失败:', error);
+                    Utils.showToast('复制失败，请手动复制');
+                } finally {
+                    document.body.removeChild(textArea);
+                }
+            },
+
+            // 初始化事件监听
+            initEventListeners: () => {
+                // 按钮点击
+                elements.newQuoteBtn.addEventListener('click', App.fetchAndDisplay);
+
+                // 复制区域点击
+                elements.quoteBox.addEventListener('click', App.copyToClipboard);
+
+                // 键盘支持（Enter和Space键）
+                elements.quoteBox.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        App.copyToClipboard();
+                    }
+                });
+
+                // 类型切换自动刷新
+                elements.typeSelect.addEventListener('change', App.fetchAndDisplay);
+
+                // 键盘快捷键支持
+                document.addEventListener('keydown', (e) => {
+                    // Ctrl/Cmd + R 刷新
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                        e.preventDefault();
+                        App.fetchAndDisplay();
+                    }
+                });
+            },
+
+            // 初始化应用
+            init: () => {
+                App.initEventListeners();
+                App.fetchAndDisplay(); // 自动加载第一条
+                console.log('✨ 文字盲盒已启动');
+            }
+        };
+
+        // ========== 应用启动 ==========
+        // 确保 DOM 完全加载后再初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', App.init);
+        } else {
+            App.init();
         }
 
-        // 复制功能
-        function copyToClipboard() {
-            const text = quoteText.innerText;
-            if (!text || text === "加载中..." || text.includes("点击下方")) return;
-            
-            navigator.clipboard.writeText(text).then(() => {
-                showToast();
-            }).catch(err => {
-                console.error('Copy failed', err);
-            });
-        }
-
-        function showToast() {
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
-        }
-
-        // 绑定事件
-        newQuoteBtn.addEventListener('click', fetchQuote);
-        quoteBox.addEventListener('click', copyToClipboard);
-        
-        // 当用户切换类型时，自动刷新
-        typeSelect.addEventListener('change', fetchQuote);
-
-        // 初始化：页面加载时自动获取第一条
-        fetchQuote();
     </script>
 </body>
 </html>
