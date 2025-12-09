@@ -1,548 +1,1074 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>图片加密解密工具</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能水印大师 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .container {
-      width: 100%;
-      max-width: 500px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      overflow: hidden;
-    }
+        body {
+            font-family: 'SF Pro Display', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFE5B4 50%, #FFF8DC 100%);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 30px 20px;
-      color: white;
-      text-align: center;
-    }
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 193, 7, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -200px;
+            right: -200px;
+            z-index: 0;
+            animation: float 15s ease-in-out infinite;
+        }
 
-    .header h1 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
+        body::after {
+            content: '';
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 152, 0, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -150px;
+            left: -150px;
+            z-index: 0;
+            animation: float 20s ease-in-out infinite reverse;
+        }
 
-    .header p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, 30px) scale(1.1); }
+        }
 
-    .tabs {
-      display: flex;
-      background: #f5f5f5;
-      position: relative;
-    }
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 1;
+        }
 
-    .tab {
-      flex: 1;
-      padding: 15px;
-      text-align: center;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.3s;
-      position: relative;
-      z-index: 1;
-    }
+        /* 顶部导航栏 */
+        .top-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 25px;
+            padding: 20px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(255, 193, 7, 0.15),
+                        0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
 
-    .tab.active {
-      color: #667eea;
-    }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-    .tab-indicator {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 50%;
-      height: 3px;
-      background: #667eea;
-      transition: transform 0.3s ease;
-    }
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #FFD54F 0%, #FFC107 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
 
-    .tab-indicator.decrypt {
-      transform: translateX(100%);
-    }
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
 
-    .content {
-      padding: 20px;
-      max-height: 60vh;
-      overflow-y: auto;
-    }
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #F57C00 0%, #FFA726 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-    .section {
-      display: none;
-    }
+        .logo-text p {
+            font-size: 12px;
+            color: #999;
+            letter-spacing: 2px;
+        }
 
-    .section.active {
-      display: block;
-    }
+        /* 主工作区 */
+        .workspace {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
 
-    .control-group {
-      margin-bottom: 20px;
-    }
+        /* 左侧控制面板 */
+        .control-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(255, 193, 7, 0.15),
+                        0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
 
-    .control-group label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: #333;
-    }
+        .control-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
 
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-      margin-bottom: 10px;
-    }
+        .control-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 10px;
+        }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
+        .control-sidebar::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #FFD54F 0%, #FFC107 100%);
+            border-radius: 10px;
+        }
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
+        /* 控制区块 */
+        .control-section {
+            margin-bottom: 30px;
+        }
 
-    .btn-secondary {
-      background: #f0f0f0;
-      color: #666;
-    }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 193, 7, 0.2);
+        }
 
-    input[type="range"] {
-      width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: #ddd;
-      outline: none;
-      -webkit-appearance: none;
-    }
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #FFF9C4 0%, #FFE082 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
 
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #667eea;
-      cursor: pointer;
-    }
+        .section-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
 
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      font-size: 14px;
-      transition: border 0.3s;
-    }
+        /* 表单控件 */
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-    input[type="text"]:focus, input[type="password"]:focus {
-      outline: none;
-      border-color: #667eea;
-    }
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 13px;
+            font-weight: 500;
+        }
 
-    .value-display {
-      display: inline-block;
-      float: right;
-      color: #667eea;
-      font-weight: 600;
-    }
+        .value-badge {
+            background: linear-gradient(135deg, #FFD54F 0%, #FFC107 100%);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+        }
 
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 24px;
-      float: right;
-    }
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid rgba(255, 193, 7, 0.2);
+            border-radius: 15px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #333;
+        }
 
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #FFC107;
+            box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.1);
+            transform: translateY(-2px);
+        }
 
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: 0.3s;
-      border-radius: 24px;
-    }
+        input[type="color"] {
+            width: 100%;
+            height: 50px;
+            border: 2px solid rgba(255, 193, 7, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            background: white;
+            padding: 5px;
+        }
 
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: 0.3s;
-      border-radius: 50%;
-    }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
 
-    input:checked + .slider {
-      background-color: #667eea;
-    }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 10px;
+        }
 
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
+        /* 滑块 */
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #FFF9C4 0%, #FFD54F 50%, #FFC107 100%);
+            outline: none;
+            -webkit-appearance: none;
+            margin: 15px 0;
+        }
 
-    .preview {
-      width: 100%;
-      max-height: 300px;
-      object-fit: contain;
-      border-radius: 10px;
-      margin-top: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFD54F 0%, #FFC107 100%);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4),
+                        0 0 0 4px rgba(255, 193, 7, 0.1);
+            transition: all 0.2s;
+        }
 
-    .password-display {
-      background: #fff3cd;
-      border: 2px solid #ffc107;
-      border-radius: 10px;
-      padding: 15px;
-      margin: 15px 0;
-      word-break: break-all;
-    }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(255, 193, 7, 0.5),
+                        0 0 0 6px rgba(255, 193, 7, 0.15);
+        }
 
-    .password-display strong {
-      color: #856404;
-      font-size: 16px;
-    }
+        /* 坐标输入组 */
+        .coord-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
 
-    .alert {
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      font-size: 14px;
-    }
+        /* 按钮组 */
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
 
-    .alert-success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-    .alert-error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
+        .btn-primary {
+            background: linear-gradient(135deg, #FFD54F 0%, #FFC107 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
 
-    input[type="file"] {
-      display: none;
-    }
-  </style>
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 2px solid rgba(255, 193, 7, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: #FFC107;
+        }
+
+        /* 大按钮 */
+        .btn-large {
+            width: 100%;
+            padding: 18px;
+            font-size: 15px;
+            margin-top: 10px;
+        }
+
+        /* 复选框 */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #FFC107;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            user-select: none;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 右侧画布区域 */
+        .canvas-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(255, 193, 7, 0.15),
+                        0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            min-height: 700px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 上传区域 */
+        .upload-zone {
+            width: 100%;
+            max-width: 600px;
+            padding: 80px 40px;
+            border: 3px dashed rgba(255, 193, 7, 0.4);
+            border-radius: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, rgba(255, 249, 228, 0.5) 0%, rgba(255, 245, 220, 0.5) 100%);
+        }
+
+        .upload-zone:hover {
+            border-color: #FFC107;
+            background: linear-gradient(135deg, rgba(255, 249, 228, 0.8) 0%, rgba(255, 245, 220, 0.8) 100%);
+            transform: scale(1.02);
+            box-shadow: 0 10px 40px rgba(255, 193, 7, 0.2);
+        }
+
+        .upload-zone.dragover {
+            border-color: #FF9800;
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%);
+            transform: scale(1.05);
+        }
+
+        .upload-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .upload-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #F57C00;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* 画布包装器 */
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        #canvas {
+            max-width: 100%;
+            max-height: calc(100vh - 200px);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            cursor: default;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        /* 拖动指示框 */
+        .drag-box {
+            position: absolute;
+            border: 2px dashed #FFC107;
+            border-radius: 8px;
+            cursor: move;
+            pointer-events: all;
+            display: none;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+            transition: border-color 0.2s;
+            background: transparent;
+        }
+
+        .drag-box.active {
+            display: block;
+        }
+
+        .drag-box:hover {
+            border-color: #FF9800;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.5);
+        }
+
+        .drag-box.dragging {
+            border-color: #FF9800;
+            box-shadow: 0 6px 16px rgba(255, 152, 0, 0.6);
+            cursor: grabbing;
+        }
+
+        /* 提示卡片 */
+        .tip-card {
+            background: linear-gradient(135deg, #FFF9C4 0%, #FFE082 100%);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #FFC107;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+        }
+
+        .tip-icon {
+            font-size: 24px;
+        }
+
+        .tip-text {
+            font-size: 13px;
+            color: #F57C00;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .control-sidebar {
+                position: relative;
+                top: 0;
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 15px 10px;
+            }
+
+            .top-bar {
+                padding: 15px 20px;
+                border-radius: 20px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .canvas-area {
+                padding: 20px;
+            }
+
+            .upload-zone {
+                padding: 60px 20px;
+            }
+        }
+
+        /* 隐藏文件输入 */
+        #fileInput {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🔐 图片加密工具</h1>
-      <p>保护您的隐私图片</p>
+    <div class="app-container">
+        <!-- 顶部栏 -->
+        <div class="top-bar">
+            <div class="logo">
+                <div class="logo-icon">✨</div>
+                <div class="logo-text">
+                    <h1>智能水印大师</h1>
+                    <p>WATERMARK PRO 2025</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主工作区 -->
+        <div class="workspace">
+            <!-- 左侧控制面板 -->
+            <div class="control-sidebar">
+                <div class="tip-card">
+                    <span class="tip-icon">💡</span>
+                    <span class="tip-text">点击水印显示框，拖动框移动位置</span>
+                </div>
+
+                <!-- 图片上传 -->
+                <div class="control-section">
+                    <div class="section-header">
+                        <div class="section-icon">📁</div>
+                        <h3>图片管理</h3>
+                    </div>
+                    <button class="btn btn-primary btn-large" onclick="document.getElementById('fileInput').click()">
+                        📤 选择图片
+                    </button>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+
+                <!-- 水印内容 -->
+                <div class="control-section">
+                    <div class="section-header">
+                        <div class="section-icon">✏️</div>
+                        <h3>水印内容</h3>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="watermarkText" placeholder="输入水印文字">
+                    </div>
+                    <div class="button-row">
+                        <button class="btn btn-secondary" onclick="setCurrentTime()">⏰ 当前时间</button>
+                        <button class="btn btn-secondary" onclick="setCurrentDate()">📅 日期</button>
+                    </div>
+                </div>
+
+                <!-- 位置设置 -->
+                <div class="control-section">
+                    <div class="section-header">
+                        <div class="section-icon">📍</div>
+                        <h3>位置设置</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>精确坐标</span>
+                        </div>
+                        <div class="coord-group">
+                            <input type="number" id="posX" placeholder="X坐标" value="0" step="1">
+                            <input type="number" id="posY" placeholder="Y坐标" value="0" step="1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 样式设置 -->
+                <div class="control-section">
+                    <div class="section-header">
+                        <div class="section-icon">🎨</div>
+                        <h3>样式设置</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>字体大小</span>
+                            <span class="value-badge" id="sizeDisplay">16</span>
+                        </div>
+                        <input type="range" id="fontSize" min="10" max="150" value="16">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>透明度</span>
+                            <span class="value-badge" id="opacityDisplay">80%</span>
+                        </div>
+                        <input type="range" id="opacity" min="0" max="100" value="80">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>旋转角度</span>
+                            <span class="value-badge" id="rotateDisplay">0°</span>
+                        </div>
+                        <input type="range" id="rotationSlider" min="-180" max="180" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>文字颜色</span>
+                        </div>
+                        <input type="color" id="textColor" value="#ffffff">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="boldText">
+                        <label for="boldText">粗体</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="shadowEffect" checked>
+                        <label for="shadowEffect">阴影效果</label>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="control-section">
+                    <div class="section-header">
+                        <div class="section-icon">⚡</div>
+                        <h3>导出操作</h3>
+                    </div>
+                    <button class="btn btn-primary btn-large" onclick="downloadImage()">
+                        💾 下载图片
+                    </button>
+                    <button class="btn btn-secondary btn-large" onclick="resetSettings()">
+                        🔄 重置设置
+                    </button>
+                </div>
+            </div>
+
+            <!-- 右侧画布区域 -->
+            <div class="canvas-area" id="canvasArea">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">点击或拖拽上传图片</div>
+                    <div class="upload-hint">支持 JPG、PNG、WEBP、GIF 格式</div>
+                </div>
+                <div class="canvas-wrapper" id="canvasWrapper" style="display: none;">
+                    <canvas id="canvas"></canvas>
+                    <div class="drag-box" id="dragBox"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('encrypt')">加密</div>
-      <div class="tab" onclick="switchTab('decrypt')">解密</div>
-      <div class="tab-indicator" id="tabIndicator"></div>
-    </div>
+    <script>
+        // ==================== 主要功能 ====================
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const uploadZone = document.getElementById('uploadZone');
+        const canvasWrapper = document.getElementById('canvasWrapper');
+        const dragBox = document.getElementById('dragBox');
+        const fileInput = document.getElementById('fileInput');
+        const posXInput = document.getElementById('posX');
+        const posYInput = document.getElementById('posY');
 
-    <div class="content">
-      <!-- 加密部分 -->
-      <div id="encryptSection" class="section active">
-        <div class="control-group">
-          <label>选择图片</label>
-          <input type="file" id="encryptInput" accept="image/*" onchange="loadEncryptImage(event)">
-          <button class="btn btn-primary" onclick="document.getElementById('encryptInput').click()">
-            📁 选择图片
-          </button>
-        </div>
-
-        <div class="control-group">
-          <label>像素大小 <span class="value-display" id="pixelValue">10</span></label>
-          <input type="range" id="pixelSize" min="1" max="30" value="10" oninput="updateValue('pixel')">
-        </div>
-
-        <div class="control-group">
-          <label>随机度 <span class="value-display" id="randomValue">50%</span></label>
-          <input type="range" id="randomness" min="0" max="100" value="50" oninput="updateValue('random')">
-        </div>
-
-        <div class="control-group">
-          <label>色彩混淆
-            <label class="switch">
-              <input type="checkbox" id="colorConfusion" checked>
-              <span class="slider"></span>
-            </label>
-          </label>
-        </div>
-
-        <button class="btn btn-primary" onclick="encryptImage()">🔒 开始加密</button>
-        
-        <div id="encryptedPassword" style="display:none"></div>
-        <button id="downloadEncryptBtn" class="btn btn-secondary" style="display:none" onclick="downloadEncrypted()">
-          ⬇️ 下载加密图片
-        </button>
-
-        <canvas id="encryptCanvas" style="display:none"></canvas>
-        <img id="encryptPreview" class="preview" style="display:none">
-      </div>
-
-      <!-- 解密部分 -->
-      <div id="decryptSection" class="section">
-        <div class="control-group">
-          <label>选择加密图片</label>
-          <input type="file" id="decryptInput" accept="image/*" onchange="loadDecryptImage(event)">
-          <button class="btn btn-primary" onclick="document.getElementById('decryptInput').click()">
-            📁 选择加密图片
-          </button>
-        </div>
-
-        <div class="control-group">
-          <label>输入密码</label>
-          <input type="password" id="decryptPassword" placeholder="请输入加密时的密码">
-        </div>
-
-        <button class="btn btn-primary" onclick="decryptImage()">🔓 开始解密</button>
-        
-        <div id="decryptResult"></div>
-        <button id="downloadDecryptBtn" class="btn btn-secondary" style="display:none" onclick="downloadDecrypted()">
-          ⬇️ 下载原图
-        </button>
-
-        <canvas id="decryptCanvas" style="display:none"></canvas>
-        <img id="decryptPreview" class="preview" style="display:none">
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let encryptedImageData = null;
-    let decryptedImageData = null;
-    let currentPassword = '';
-
-    function switchTab(tab) {
-      const tabs = document.querySelectorAll('.tab');
-      const sections = document.querySelectorAll('.section');
-      const indicator = document.getElementById('tabIndicator');
-
-      tabs.forEach(t => t.classList.remove('active'));
-      sections.forEach(s => s.classList.remove('active'));
-
-      if (tab === 'encrypt') {
-        tabs[0].classList.add('active');
-        document.getElementById('encryptSection').classList.add('active');
-        indicator.classList.remove('decrypt');
-      } else {
-        tabs[1].classList.add('active');
-        document.getElementById('decryptSection').classList.add('active');
-        indicator.classList.add('decrypt');
-      }
-    }
-
-    function updateValue(type) {
-      if (type === 'pixel') {
-        document.getElementById('pixelValue').textContent = document.getElementById('pixelSize').value;
-      } else {
-        document.getElementById('randomValue').textContent = document.getElementById('randomness').value + '%';
-      }
-    }
-
-    function loadEncryptImage(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.getElementById('encryptCanvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          
-          const preview = document.getElementById('encryptPreview');
-          preview.src = event.target.result;
-          preview.style.display = 'block';
+        let currentImage = null;
+        let watermark = {
+            x: 0,
+            y: 0,
+            rotation: 0,
+            fontSize: 16,
+            text: ''
         };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
 
-    function loadDecryptImage(e) {
-      const file = e.target.files[0];
-      if (!file) return;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStartWmX = 0;
+        let dragStartWmY = 0;
 
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.getElementById('decryptCanvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-        };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+        // 初始化
+        function init() {
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            document.getElementById('watermarkText').value = timeStr;
+            watermark.text = timeStr;
 
-    function generatePassword() {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let password = '';
-      for (let i = 0; i < 16; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return password;
-    }
+            // 文件上传
+            fileInput.addEventListener('change', handleFileSelect);
+            uploadZone.addEventListener('click', () => fileInput.click());
 
-    function encryptImage() {
-      const canvas = document.getElementById('encryptCanvas');
-      if (canvas.width === 0) {
-        alert('请先选择图片！');
-        return;
-      }
+            // 拖放上传
+            uploadZone.addEventListener('dragover', e => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
 
-      const ctx = canvas.getContext('2d');
-      const pixelSize = parseInt(document.getElementById('pixelSize').value);
-      const randomness = parseInt(document.getElementById('randomness').value) / 100;
-      const colorConfusion = document.getElementById('colorConfusion').checked;
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
+            uploadZone.addEventListener('drop', e => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    loadImage(file);
+                }
+            });
 
-      currentPassword = generatePassword();
+            // 画布点击显示拖动框 - 优化版
+            canvas.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleCanvasClick(e);
+            });
 
-      // 使用密码作为随机种子
-      let seed = 0;
-      for (let i = 0; i < currentPassword.length; i++) {
-        seed += currentPassword.charCodeAt(i);
-      }
+            // 拖动框事件
+            dragBox.addEventListener('mousedown', handleDragStart);
+            document.addEventListener('mousemove', handleDragMove);
+            document.addEventListener('mouseup', handleDragEnd);
 
-      function seededRandom() {
-        seed = (seed * 9301 + 49297) % 233280;
-        return seed / 233280;
-      }
+            // 触摸事件
+            dragBox.addEventListener('touchstart', handleTouchStart);
+            document.addEventListener('touchmove', handleTouchMove);
+            document.addEventListener('touchend', handleDragEnd);
 
-      for (let y = 0; y < canvas.height; y += pixelSize) {
-        for (let x = 0; x < canvas.width; x += pixelSize) {
-          if (seededRandom() < randomness) {
-            const avgR = [], avgG = [], avgB = [];
-            
-            for (let dy = 0; dy < pixelSize && y + dy < canvas.height; dy++) {
-              for (let dx = 0; dx < pixelSize && x + dx < canvas.width; dx++) {
-                const i = ((y + dy) * canvas.width + (x + dx)) * 4;
-                avgR.push(data[i]);
-                avgG.push(data[i + 1]);
-                avgB.push(data[i + 2]);
-              }
-            }
+            // 坐标输入事件
+            posXInput.addEventListener('input', handleCoordInput);
+            posYInput.addEventListener('input', handleCoordInput);
 
-            let r = Math.floor(avgR.reduce((a, b) => a + b) / avgR.length);
-            let g = Math.floor(avgG.reduce((a, b) => a + b) / avgG.length);
-            let b = Math.floor(avgB.reduce((a, b) => a + b) / avgB.length);
+            // 控件变化
+            ['watermarkText', 'fontSize', 'opacity', 'textColor', 'boldText', 'shadowEffect', 'rotationSlider'].forEach(id => {
+                const el = document.getElementById(id);
+                el.addEventListener('input', updateWatermark);
+                el.addEventListener('change', updateWatermark);
+            });
 
-            if (colorConfusion) {
-              r = Math.floor(seededRandom() * 256);
-              g = Math.floor(seededRandom() * 256);
-              b = Math.floor(seededRandom() * 256);
-            }
-
-            for (let dy = 0; dy < pixelSize && y + dy < canvas.height; dy++) {
-              for (let dx = 0; dx < pixelSize && x + dx < canvas.width; dx++) {
-                const i = ((y + dy) * canvas.width + (x + dx)) * 4;
-                data[i] = r;
-                data[i + 1] = g;
-                data[i + 2] = b;
-              }
-            }
-          }
+            // 点击其他地方隐藏拖动框
+            document.addEventListener('click', e => {
+                if (!canvas.contains(e.target) && !dragBox.contains(e.target) && !e.target.closest('.control-sidebar')) {
+                    dragBox.classList.remove('active');
+                }
+            });
         }
-      }
 
-      ctx.putImageData(imageData, 0, 0);
-      encryptedImageData = canvas.toDataURL('image/png');
+        // 坐标输入处理
+        function handleCoordInput() {
+            if (!currentImage) return;
 
-      document.getElementById('encryptPreview').src = encryptedImageData;
-      document.getElementById('downloadEncryptBtn').style.display = 'block';
-      
-      document.getElementById('encryptedPassword').innerHTML = `
-        <div class="password-display">
-          <strong>⚠️ 请保存此密码：</strong><br>
-          <div style="font-size: 18px; margin-top: 10px; user-select: all;">${currentPassword}</div>
-        </div>
-      `;
-      document.getElementById('encryptedPassword').style.display = 'block';
-    }
+            const x = parseInt(posXInput.value) || 0;
+            const y = parseInt(posYInput.value) || 0;
 
-    function decryptImage() {
-      const canvas = document.getElementById('decryptCanvas');
-      if (canvas.width === 0) {
-        alert('请先选择加密图片！');
-        return;
-      }
+            // 限制在画布内
+            watermark.x = Math.max(0, Math.min(canvas.width, x));
+            watermark.y = Math.max(0, Math.min(canvas.height, y));
 
-      const password = document.getElementById('decryptPassword').value;
-      if (!password) {
-        alert('请输入密码！');
-        return;
-      }
+            // 同步回输入框
+            posXInput.value = Math.round(watermark.x);
+            posYInput.value = Math.round(watermark.y);
 
-      document.getElementById('decryptResult').innerHTML = 
-        '<div class="alert alert-success">✅ 解密成功！这是模拟解密，实际应用需要保存加密参数。</div>';
-      
-      decryptedImageData = canvas.toDataURL('image/png');
-      document.getElementById('decryptPreview').src = decryptedImageData;
-      document.getElementById('decryptPreview').style.display = 'block';
-      document.getElementById('downloadDecryptBtn').style.display = 'block';
-    }
+            updateWatermark();
+            if (dragBox.classList.contains('active')) {
+                updateDragBox();
+            }
+        }
 
-    function downloadEncrypted() {
-      const link = document.createElement('a');
-      link.download = 'encrypted_image.png';
-      link.href = encryptedImageData;
-      link.click();
-    }
+        // 文件选择
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) loadImage(file);
+        }
 
-    function downloadDecrypted() {
-      const link = document.createElement('a');
-      link.download = 'decrypted_image.png';
-      link.href = decryptedImageData;
-      link.click();
-    }
-  </script>
+        // 加载图片
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => {
+                    currentImage = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    // 根据图片大小自动设置字体
+                    const autoSize = Math.max(14, Math.floor(img.height / 50));
+                    document.getElementById('fontSize').value = autoSize;
+                    watermark.fontSize = autoSize;
+
+                    // 默认位置：图片中间底部
+                    watermark.x = Math.floor(img.width * 0.5);
+                    watermark.y = Math.floor(img.height * 0.95);
+                    watermark.rotation = 0;
+
+                    // 更新坐标输入框
+                    posXInput.value = Math.round(watermark.x);
+                    posYInput.value = Math.round(watermark.y);
+
+                    // 显示画布
+                    uploadZone.style.display = 'none';
+                    canvasWrapper.style.display = 'inline-block';
+
+                    updateWatermark();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 画布点击 - 优化版，防止触发默认行为
+        function handleCanvasClick(e) {
+            if (!currentImage) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+
+            // 检测是否点击在水印附近
+            const dx = mouseX - watermark.x;
+            const dy = mouseY - watermark.y;
+
+            // 逆旋转计算
+            const cos = Math.cos(-watermark.rotation);
+            const sin = Math.sin(-watermark.rotation);
+            const rotatedX = dx * cos - dy * sin;
+            const rotatedY = dx * sin + dy * cos;
+
+            ctx.font = `${document.getElementById('boldText').checked ? 'bold' : 'normal'} ${watermark.fontSize}px Microsoft YaHei`;
+            const metrics = ctx.measureText(watermark.text);
+            const textWidth = metrics.width / 2;
+            const textHeight = watermark.fontSize * 0.6;
+
+            if (Math.abs(rotatedX) < textWidth + 20 && Math.abs(rotatedY) < textHeight + 10) {
+                dragBox.classList.add('active');
+                updateDragBox();
+            }
+        }
+
+        // 更新水印
+        function updateWatermark() {
+            if (!currentImage) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(currentImage, 0, 0);
+
+            const text = document.getElementById('watermarkText').value;
+            if (!text) return;
+
+            const fontSize = parseInt(document.getElementById('fontSize').value);
+            const opacity = parseInt(document.getElementById('opacity').value) / 100;
+            const color = document.getElementById('textColor').value;
+            const bold = document.getElementById('boldText').checked;
+            const shadow = document.getElementById('shadowEffect').checked;
+            const rotation = parseInt(document.getElementById('rotationSlider').value);
+
+            watermark.text = text;
+            watermark.fontSize = fontSize;
+            watermark.rotation = rotation * Math.PI / 180;
+
+            // 更新显示
+            document.getElementById('sizeDisplay').textContent = fontSize;
+            document.getElementById('opacityDisplay').textContent = Math.round(opacity * 100) + '%';
+            document.getElementById('rotateDisplay').textContent = rotation + '°';
+
+            // 更新坐标输入框（如果不是从输入框触发的）
+            if (document.activeElement !== posXInput && document.activeElement !== posYInput) {
+                posXInput.value = Math.round(watermark.x);
+                posYInput.value = Math.round(watermark.y);
+            }
+
+            // 绘制水印
+            ctx.save();
+            ctx.translate(watermark.x, watermark.y);
+            ctx.rotate(watermark.rotation);
+
+            ctx.globalAlpha = opacity;
+            ctx.font = `${bold ? 'bold' : 'normal'} ${fontSize}px Microsoft YaHei`;
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            if (shadow) {
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+            }
+
+            ctx.fillText(text, 0, 0);
+            ctx.restore();
+
+            if (dragBox.classList.contains('active')) {
+                updateDragBox();
+            }
+        }
+
+        // 更新拖动框
+        function updateDragBox() {
+            if (!currentImage) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = rect.width / canvas.width;
+            const scaleY = rect.height / canvas.height;
+
+            // 计算文本尺寸
+            ctx.font = `${document.getElementById('boldText').checked ? 'bold' : 'normal'} ${watermark.fontSize}px Microsoft YaHei`;
+            const metrics = ctx.measureText(watermark.text);
+            const textWidth = metrics.width;
+            const textHeight = watermark.fontSize * 1.2;
+
+            // 考虑旋转后的边界框
+            const cos = Math.abs(Math.cos(watermark.rotation));
+            const sin = Math.abs(Math.sin(watermark.rotation));
+            const boxWidth = textWidth * cos + textHeight * sin;
+            const boxHeight = textWidth * sin + textHeight * cos;
+
+            // 紧贴水印
+            const padding = 8;
+            const finalWidth = (boxWidth + padding) * scaleX;
+            const finalHeight = (boxHeight + padding) * scaleY;
+
+            const left = watermark.x * scaleX - finalWidth / 2;
+            const top = watermark.y * scaleY - finalHeight / 2;
+
+            dragBox.style.left = left + 'px';
+            dragBox.style.top = top + 'px';
+            dragBox.style.width = finalWidth + 'px';
+            dragBox.style.height = finalHeight + 'px';
+        }
+
+        // 拖动开始
+        function handleDragStart(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isDragging = true;
+
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            dragStartWmX = watermark.x;
+            dragStartWmY = watermark.y;
+
+            dragBox.classList.add('dragging');
+        }
+
+        // 拖动中
+        function handleDragMove(e) {
+            if (!isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const dx = (e.clientX - dragStartX) * scaleX;
+            const dy = (e.clientY - dragStartY) * scaleY;
+
+            // 限制在画布内
+            watermark.x = Math.max(0, Math.min(canvas.width, dragStartWmX + dx));
+            watermark.y = Math.max(0, Math.min(canvas.height, dragStartWmY + dy));
+
+            // 更新坐标输入框
+            posXInput.value = Math.round(watermark.x);
+            posYInput.value = Math.round(watermark.y);
+
+            updateWatermark();
+        }
+
+        // 拖动结束
+        function handleDragEnd() {
+            if (isDragging) {
+                isDragging = false;
+                dragBox.classList.remove('dragging');
+            }
+        }
+
+        // 触摸事件
+        function handleTouchStart(e) {
+            const touch = e.touches[0];
+            handleDragStart({ 
+                clientX: touch.clientX, 
+                clientY: touch.clientY, 
+                preventDefault: () => e.preventDefault(),
+                stopPropagation: () => e.stopPropagation()
+            });
+        }
+
+        function handleTouchMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            handleDragMove({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        // 设置当前时间
+        function setCurrentTime() {
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            document.getElementById('watermarkText').value = timeStr;
+            updateWatermark();
+        }
+
+        // 设置当前日期
+        function setCurrentDate() {
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日`;
+            document.getElementById('watermarkText').value = dateStr;
+            updateWatermark();
+        }
+
+        // 下载图片
+        function downloadImage() {
+            if (!currentImage) {
+                alert('请先上传图片！');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = `watermark_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+
+        // 重置设置
+        function resetSettings() {
+            if (!currentImage) return;
+
+            if (confirm('确定要重置所有设置吗？')) {
+                setCurrentTime();
+                const autoSize = Math.max(14, Math.floor(canvas.height / 50));
+                document.getElementById('fontSize').value = autoSize;
+                document.getElementById('opacity').value = 80;
+                document.getElementById('rotationSlider').value = 0;
+                document.getElementById('textColor').value = '#ffffff';
+                document.getElementById('boldText').checked = false;
+                document.getElementById('shadowEffect').checked = true;
+                watermark.x = Math.floor(canvas.width * 0.5);
+                watermark.y = Math.floor(canvas.height * 0.95);
+                watermark.rotation = 0;
+                posXInput.value = Math.round(watermark.x);
+                posYInput.value = Math.round(watermark.y);
+                updateWatermark();
+            }
+        }
+
+        // 初始化
+        init();
+    </script>
 </body>
 </html>
