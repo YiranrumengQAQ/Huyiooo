@@ -689,6 +689,7 @@
         const posYInput = document.getElementById('posY');
 
         let currentImage = null;
+        let originalImageType = 'image/png'; // 记录原始图片格式
         let watermark = {
             x: 0,
             y: 0,
@@ -798,6 +799,8 @@
 
         // 加载图片
         function loadImage(file) {
+            // 记录原始图片格式
+            originalImageType = file.type || 'image/png';
             const reader = new FileReader();
             reader.onload = e => {
                 const img = new Image();
@@ -1039,9 +1042,25 @@
                 return;
             }
 
+            // 根据原始图片格式选择导出格式和质量
+            let mimeType = originalImageType;
+            let quality = 0.92; // JPEG质量，0-1之间
+            let extension = 'png';
+
+            if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
+                mimeType = 'image/jpeg';
+                extension = 'jpg';
+            } else if (mimeType === 'image/webp') {
+                extension = 'webp';
+            } else {
+                // PNG或其他格式，使用PNG
+                mimeType = 'image/png';
+                quality = 1.0;
+            }
+
             const link = document.createElement('a');
-            link.download = `watermark_${Date.now()}.png`;
-            link.href = canvas.toDataURL('image/png', 1.0);
+            link.download = `watermark_${Date.now()}.${extension}`;
+            link.href = canvas.toDataURL(mimeType, quality);
             link.click();
         }
 
